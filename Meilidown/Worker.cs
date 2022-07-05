@@ -29,7 +29,7 @@ namespace Meilidown
 
         private static string GetRepositoryPath(IConfiguration config)
         {
-            return Path.Combine(Environment.CurrentDirectory, "tmp", config["Path"]);
+            return Path.Combine(Path.GetTempPath(), "Meilidown", config["Path"]);
         }
 
         private static void UpdateRepository(IConfiguration config, CancellationToken cancellationToken)
