@@ -9,6 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Glob" Version="1.1.9" />
+        <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
+        <PackageReference Include="Markdig" Version="0.30.1" />
+        <PackageReference Include="MeiliSearch" Version="0.10.2" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     </ItemGroup>
 </Project>
