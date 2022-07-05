@@ -15,4 +15,13 @@
         <PackageReference Include="MeiliSearch" Version="0.10.2" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.gitignore">
+        <Link>.gitignore</Link>
+      </Content>
+      <Content Include="..\LICENSE">
+        <Link>LICENSE</Link>
+      </Content>
+    </ItemGroup>
 </Project>
