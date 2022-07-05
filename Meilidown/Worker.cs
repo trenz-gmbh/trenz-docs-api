@@ -1,6 +1,4 @@
-using GlobExpressions;
 using LibGit2Sharp;
-using Markdig;
 using Meilisearch;
 
 namespace Meilidown
@@ -20,29 +18,26 @@ namespace Meilidown
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var files = GatherFiles(stoppingToken);
+                var files = GatherFiles();
                 await IndexFiles(files, stoppingToken);
 
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                //await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                Console.ReadKey();
             }
         }
 
-        private static string GetRepositoryPath(IConfiguration config)
+        private static void UpdateRepository(RepositoryConfiguration config)
         {
-            return Path.Combine(Path.GetTempPath(), "Meilidown", config["Path"]);
-        }
+            Credentials CredentialsHelper(string path, string username, SupportedCredentialTypes supportedCredentialTypes) =>
+                new UsernamePasswordCredentials { Username = config.Username, Password = config.Password };
 
-        private static void UpdateRepository(IConfiguration config, CancellationToken cancellationToken)
-        {
-            var temp = GetRepositoryPath(config);
+            var temp = config.Root;
             if (!Directory.Exists(temp))
             {
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                Repository.Clone(config["Url"], temp, new()
+                Repository.Clone(config.Url, temp, new()
                     {
-                        BranchName = config["Branch"],
+                        BranchName = config.Branch,
+                        CredentialsProvider = CredentialsHelper,
                     }
                 );
             }
@@ -50,23 +45,17 @@ namespace Meilidown
             using var repo = new Repository(temp);
             foreach (var remote in repo.Network.Remotes)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
                 var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
-                Commands.Fetch(repo, remote.Name, refSpecs, new(), $"Fetching remote {remote.Name}");
+                Commands.Fetch(repo, remote.Name, refSpecs, new()
+                {
+                    CredentialsProvider = CredentialsHelper,
+                }, $"Fetching remote {remote.Name}");
             }
 
-            if (repo.Head.FriendlyName != config["Branch"])
+            if (repo.Head.FriendlyName != config.Branch)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    return;
-
-                Commands.Checkout(repo, config["Branch"]);
+                Commands.Checkout(repo, config.Branch);
             }
-
-            if (cancellationToken.IsCancellationRequested)
-                return;
 
             Commands.Pull(
                 repo,
@@ -78,58 +67,94 @@ namespace Meilidown
                         MergeFileFavor = MergeFileFavor.Theirs,
                         FileConflictStrategy = CheckoutFileConflictStrategy.Theirs,
                     },
+                    FetchOptions = new()
+                    {
+                        CredentialsProvider = CredentialsHelper,
+                    },
                 }
             );
         }
 
-        private IEnumerable<string> GatherFiles(CancellationToken cancellationToken)
+        private IEnumerable<RepositoryFile> GatherFiles()
         {
             foreach (var source in _configuration.GetRequiredSection("Sources").GetChildren())
             {
-                if (source == null)
-                    continue;
+                var repositoryConfig = new RepositoryConfiguration(source);
+                UpdateRepository(repositoryConfig);
 
-                var repositoryConfig = source.GetRequiredSection("Repository");
-                UpdateRepository(repositoryConfig, cancellationToken);
-
-                var path = GetRepositoryPath(repositoryConfig);
-                foreach (var pattern in source.GetRequiredSection("Paths").GetChildren().Select(s => s.Value))
+                foreach (var repositoryFile in GatherRepositoryFiles(repositoryConfig))
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        break;
-
-                    foreach (var file in Glob.Files(path, pattern))
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                            break;
-
-                        yield return Path.Combine(path, file);
-                    }
+                    yield return repositoryFile;
                 }
             }
         }
 
-        private async Task IndexFiles(IEnumerable<string> paths, CancellationToken cancellationToken)
+        private static IEnumerable<RepositoryFile> GatherRepositoryFiles(RepositoryConfiguration config)
+        {
+            return IterateDirectory(config, Path.Combine(config.Root, config.Path));
+        }
+
+        private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, string path)
+        {
+            foreach (var file in Directory.EnumerateFileSystemEntries(path, "**.md", SearchOption.AllDirectories))
+            {
+                if (File.Exists(file))
+                {
+                    yield return new(config, Path.GetRelativePath(path, file));
+
+                    continue;
+                }
+
+                if (!Directory.Exists(file))
+                    continue;
+
+                foreach (var f in IterateDirectory(config, file))
+                {
+                    yield return f;
+                }
+            }
+        }
+
+        private async Task IndexFiles(IEnumerable<RepositoryFile> files, CancellationToken cancellationToken)
         {
             var client = new MeilisearchClient(_configuration["Meilisearch:Url"], _configuration["Meilisearch:ApiKey"]);
             var health = await client.HealthAsync(cancellationToken);
             _logger.LogInformation("Meilisearch is {Status}", health.Status);
 
-            var markdownPipeline = new MarkdownPipelineBuilder()
-                .UseAdvancedExtensions()
-                .UseEmojiAndSmiley()
-                .UseYamlFrontMatter()
-                .UseDiagrams()
-                .Build();
-            foreach (var path in paths)
+            // var markdownPipeline = new MarkdownPipelineBuilder()
+            //     .UseAdvancedExtensions()
+            //     .UseEmojiAndSmiley()
+            //     .UseYamlFrontMatter()
+            //     .UseDiagrams()
+            //     .Build();
+
+            var fils = files.Select(f =>
             {
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+                _logger.LogInformation("Processing {File}", f.RelativePath);
 
-                var content = await File.ReadAllTextAsync(path, cancellationToken);
-                var document = Markdown.Parse(content, markdownPipeline);
+                var content = File.ReadAllText(f.AbsolutePath);
+                // var document = Markdown.Parse(content, markdownPipeline);
+                return new IndexedFile(
+                    f.Uid,
+                    f.ParentUid,
+                    content,
+                    0
+                );
+            });
 
-                _logger.LogInformation("File {Path} has {Lines} lines", path, document.LineCount);
+            var filesIndex = client.Index("files");
+            var tasks = new[]
+            {
+                filesIndex.DeleteAllDocumentsAsync(cancellationToken),
+                filesIndex.AddDocumentsAsync(fils, cancellationToken: cancellationToken),
+            };
+
+            foreach (var task in tasks)
+            {
+                var info = await task;
+                var result = await client.WaitForTaskAsync(info.Uid, cancellationToken: cancellationToken);
+
+                _logger.LogInformation("{@Result}", result);
             }
         }
     }
