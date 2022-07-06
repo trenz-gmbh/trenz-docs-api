@@ -11,9 +11,11 @@ public record RepositoryFile(RepositoryConfiguration Config, string RelativePath
 
     public string AbsolutePath => Path.Combine(Config.Root, Config.Path, RelativePath);
 
+    public string Location => string.Join('.', RelativePath.Split('.').SkipLast(1)).Replace("\\", "/");
+
     public string Name => Path.GetFileNameWithoutExtension(RelativePath);
 
-    public string Uid => ToMd5(Config.Name + Separator + Name);
+    public string Uid => ToMd5(Config.Name + Separator + RelativePath);
 
     public string? ParentUid => Path.GetRelativePath(Directory.GetParent(AbsolutePath)?.FullName ?? "", Path.Combine(Config.Root, Config.Path)) != "." ? ToMd5(Config.Name + Separator + Directory.GetParent(AbsolutePath)!.Name) : null;
 }

@@ -129,24 +129,32 @@ namespace Meilidown
 
             var fils = files.Select(f =>
             {
-                _logger.LogInformation("Processing {File}", f.RelativePath);
+                _logger.LogInformation("Processing {File}", f.Location);
 
                 var content = File.ReadAllText(f.AbsolutePath);
                 // var document = Markdown.Parse(content, markdownPipeline);
                 return new IndexedFile(
                     f.Uid,
-                    f.ParentUid,
                     f.Name,
                     content,
-                    0
+                    0,
+                    f.Location
                 );
             });
+
+            var settings = new Settings
+            {
+                FilterableAttributes = new[] { "uid", "name", "location", "content" },
+                SortableAttributes = new[] { "name", "order", "location" },
+                SearchableAttributes = new[] { "name", "location", "content" },
+            };
 
             var filesIndex = client.Index("files");
             var tasks = new Dictionary<string, Task<TaskInfo>>
             {
                 { "Delete previous index", filesIndex.DeleteAllDocumentsAsync(cancellationToken) },
                 { "Add new index", filesIndex.AddDocumentsAsync(fils, cancellationToken: cancellationToken) },
+                { "Update index settings", filesIndex.UpdateSettingsAsync(settings, cancellationToken) },
             };
 
             foreach (var task in tasks)
