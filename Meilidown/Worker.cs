@@ -136,6 +136,7 @@ namespace Meilidown
                 return new IndexedFile(
                     f.Uid,
                     f.ParentUid,
+                    f.Name,
                     content,
                     0
                 );
