@@ -5,7 +5,7 @@ namespace Meilidown;
 
 public record RepositoryFile(RepositoryConfiguration Config, string RelativePath)
 {
-    public const char Separator = '_';
+    private const char Separator = '#';
 
     private static string ToMd5(string text) => Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(text)));
 

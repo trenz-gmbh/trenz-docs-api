@@ -21,8 +21,7 @@ namespace Meilidown
                 var files = GatherFiles();
                 await IndexFiles(files, stoppingToken);
 
-                //await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
-                Console.ReadKey();
+                await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
             }
         }
 
@@ -143,18 +142,24 @@ namespace Meilidown
             });
 
             var filesIndex = client.Index("files");
-            var tasks = new[]
+            var tasks = new Dictionary<string, Task<TaskInfo>>
             {
-                filesIndex.DeleteAllDocumentsAsync(cancellationToken),
-                filesIndex.AddDocumentsAsync(fils, cancellationToken: cancellationToken),
+                { "Delete previous index", filesIndex.DeleteAllDocumentsAsync(cancellationToken) },
+                { "Add new index", filesIndex.AddDocumentsAsync(fils, cancellationToken: cancellationToken) },
             };
 
             foreach (var task in tasks)
             {
-                var info = await task;
+                var info = await task.Value;
                 var result = await client.WaitForTaskAsync(info.Uid, cancellationToken: cancellationToken);
+                _logger.LogInformation("Task '{Name}': {Status}", task.Key, result.Status);
 
-                _logger.LogInformation("{@Result}", result);
+                if (result.Error == null) continue;
+
+                foreach (var e in result.Error.Values)
+                {
+                    _logger.LogError("{@Error}", e);
+                }
             }
         }
     }
