@@ -31,3 +31,5 @@ services:
     environment:
       - MEILI_MASTER_KEY=${MEILISEARCH_API_KEY:-masterKey}
       - MEILI_NO_ANALYTICS=true
+    volumes:
+      - ./data:/data
