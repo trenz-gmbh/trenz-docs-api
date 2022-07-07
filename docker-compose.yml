@@ -11,6 +11,8 @@ services:
       - FileApi__Image=${API_FRONT:-https://localhost}/Image/{0}
     depends_on:
       - meilisearch
+    volumes:
+      - appsettings.local.json:/app/appsettings.local.json
   api:
     build:
       context: .
@@ -24,6 +26,8 @@ services:
     depends_on:
       - meilisearch
       - indexer
+    volumes:
+      - appsettings.local.json:/app/appsettings.local.json
   meilisearch:
     image: getmeili/meilisearch:latest
     ports:
