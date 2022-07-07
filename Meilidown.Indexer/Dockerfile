@@ -3,10 +3,9 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["Meilidown.Indexer/Meilidown.Indexer.csproj", "Meilidown.Indexer/"]
-RUN dotnet restore "Meilidown.Indexer/Meilidown.Indexer.csproj"
+COPY ["Meilidown.Indexer.csproj", "."]
+RUN dotnet restore "Meilidown.Indexer.csproj"
 COPY . .
-WORKDIR "/src/Meilidown.Indexer"
 RUN dotnet build "Meilidown.Indexer.csproj" -c Release -o /app/build
 
 FROM build AS publish
