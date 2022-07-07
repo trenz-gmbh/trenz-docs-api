@@ -1,7 +1,7 @@
 using LibGit2Sharp;
 using Meilisearch;
 
-namespace Meilidown
+namespace Meilidown.Indexer
 {
     public class Worker : BackgroundService
     {

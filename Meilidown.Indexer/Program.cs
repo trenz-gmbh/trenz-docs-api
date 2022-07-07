@@ -1,4 +1,4 @@
-using Meilidown;
+using Meilidown.Indexer;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services => { services.AddHostedService<Worker>(); })
