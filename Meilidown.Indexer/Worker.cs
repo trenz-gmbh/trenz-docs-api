@@ -58,7 +58,7 @@ namespace Meilidown
 
             Commands.Pull(
                 repo,
-                new("Meilidown", "meilidown@example.com", DateTimeOffset.Now),
+                new("Meilidown.Indexer", "meilidown@example.com", DateTimeOffset.Now),
                 new()
                 {
                     MergeOptions = new()

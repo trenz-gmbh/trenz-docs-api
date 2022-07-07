@@ -10,7 +10,7 @@ public class RepositoryConfiguration
     public string Path => _configuration["Path"];
     public string? Username => _configuration["Username"];
     public string? Password => _configuration["Password"];
-    public string Root => System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Meilidown", Name);
+    public string Root => System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Meilidown.Indexer", Name);
 
     public RepositoryConfiguration(IConfiguration configuration)
     {

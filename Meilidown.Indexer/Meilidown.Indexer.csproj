@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>dotnet-Meilidown-CD5BFA0F-509D-498F-ACF0-55F022B246B1</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <RootNamespace>Meilidown</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

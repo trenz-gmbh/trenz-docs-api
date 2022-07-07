@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meilidown", "Meilidown\Meilidown.csproj", "{74EBB4EE-055B-4081-975B-C743E3CC5646}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meilidown.Indexer", "Meilidown.Indexer\Meilidown.Indexer.csproj", "{74EBB4EE-055B-4081-975B-C743E3CC5646}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
