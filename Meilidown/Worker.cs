@@ -90,16 +90,17 @@ namespace Meilidown
 
         private static IEnumerable<RepositoryFile> GatherRepositoryFiles(RepositoryConfiguration config)
         {
-            return IterateDirectory(config, Path.Combine(config.Root, config.Path));
+            var root = Path.Combine(config.Root, config.Path);
+            return IterateDirectory(config, root, root);
         }
 
-        private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, string path)
+        private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, string path, string root)
         {
             foreach (var file in Directory.EnumerateFileSystemEntries(path, "**.md", SearchOption.AllDirectories))
             {
                 if (File.Exists(file))
                 {
-                    yield return new(config, Path.GetRelativePath(path, file));
+                    yield return new(config, Path.GetRelativePath(root, file));
 
                     continue;
                 }
@@ -107,7 +108,7 @@ namespace Meilidown
                 if (!Directory.Exists(file))
                     continue;
 
-                foreach (var f in IterateDirectory(config, file))
+                foreach (var f in IterateDirectory(config, file, root))
                 {
                     yield return f;
                 }
