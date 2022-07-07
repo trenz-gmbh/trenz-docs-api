@@ -5,22 +5,27 @@ services:
     build:
       context: ./Meilidown.Indexer/
     environment:
-      - MEILISEARCH_HOST=meilisearch
-      - MEILISEARCH_PORT=7700
+      - Meilisearch__Url=http://meilisearch:${MEILISEARCH_PORT:-7700}
+      - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
+    depends_on:
+      - meilisearch
   api:
     build:
       context: ./Meilidown.API/
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
-      - MEILISEARCH_HOST=meilisearch
-      - MEILISEARCH_PORT=7700
+      - Meilisearch__Url=http://meilisearch:${MEILISEARCH_PORT:-7700}
+      - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - meilisearch
+      - indexer
   meilisearch:
     image: getmeili/meilisearch:latest
     ports:
-      - "7700:7700"
+      - "${MEILISEARCH_PORT:-7700}:7700"
     environment:
-      - MEILI_MASTER_KEY=masterKey
+      - MEILI_MASTER_KEY=${MEILISEARCH_API_KEY:-masterKey}
       - MEILI_NO_ANALYTICS=true
