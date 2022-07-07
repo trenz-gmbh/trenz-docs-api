@@ -1,12 +1,22 @@
 ﻿version: '3.4'
 
 services:
-#  meilidown:
-#    build:
-#      context: .
-#    environment:
-#      - MEILISEARCH_HOST=meilisearch
-#      - MEILISEARCH_PORT=7700
+  indexer:
+    build:
+      context: ./Meilidown.Indexer/
+    environment:
+      - MEILISEARCH_HOST=meilisearch
+      - MEILISEARCH_PORT=7700
+  api:
+    build:
+      context: ./Meilidown.API/
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - MEILISEARCH_HOST=meilisearch
+      - MEILISEARCH_PORT=7700
+    ports:
+      - "80:80"
+      - "443:443"
   meilisearch:
     image: getmeili/meilisearch:latest
     ports:
