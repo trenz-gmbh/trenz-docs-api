@@ -18,4 +18,10 @@ public class RepositoryConfiguration
     {
         _configuration = configuration;
     }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"Repository: {{Name: {Name}, Url: {Url}, Branch: {Branch}, Path: {Path}}}";
+    }
 }

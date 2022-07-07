@@ -23,6 +23,8 @@ namespace Meilidown.Indexer
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                _logger.LogInformation("Running at {Time}", DateTimeOffset.Now);
+
                 var files = GatherFiles();
                 var indexedFiles = ProcessFiles(files);
                 await UpdateIndex(indexedFiles, stoppingToken);
@@ -37,9 +39,15 @@ namespace Meilidown.Indexer
 
         private IEnumerable<RepositoryFile> GatherFiles()
         {
+            _logger.LogInformation("Gathering files...");
+            
             foreach (var repository in RepositoryRepository.GetRepositories(_configuration))
             {
+                _logger.LogInformation("Updating repository {Repository}...", repository);
+
                 repository.Update();
+
+                _logger.LogInformation("Gathering files from repository {Repository}...", repository);
 
                 foreach (var repositoryFile in repository.FindFiles("**.md"))
                 {
@@ -126,10 +134,7 @@ namespace Meilidown.Indexer
 
                 if (result.Error == null) continue;
 
-                foreach (var e in result.Error.Values)
-                {
-                    _logger.LogError("{@Error}", e);
-                }
+                _logger.LogError("{@Error}", string.Join(Environment.NewLine, result.Error.Values));
             }
         }
     }
