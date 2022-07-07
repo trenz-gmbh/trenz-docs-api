@@ -90,7 +90,7 @@ namespace Meilidown.Indexer
             {
                 if (child is not LinkInline { IsImage: true } link) continue;
 
-                var location = string.Join('/', file.RelativePath.Split('\\').SkipLast(1)) + '/' + link.Url;
+                var location = string.Join('/', file.RelativePath.Split(Path.PathSeparator).SkipLast(1)) + '/' + link.Url;
 
                 link.Url = string.Format(_configuration["FileApi:Image"], Uri.EscapeDataString(location));
                 if (link.Reference != null) link.Reference.Url = null;
