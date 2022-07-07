@@ -43,11 +43,11 @@ namespace Meilidown.Indexer
             
             foreach (var repository in RepositoryRepository.GetRepositories(_configuration))
             {
-                _logger.LogInformation("Updating repository {Repository}...", repository);
+                _logger.LogInformation("Updating {Repository}", repository);
 
                 repository.Update();
 
-                _logger.LogInformation("Gathering files from repository {Repository}...", repository);
+                _logger.LogInformation("Gathering files from {Repository}", repository);
 
                 foreach (var repositoryFile in repository.FindFiles("**.md"))
                 {
@@ -67,7 +67,7 @@ namespace Meilidown.Indexer
 
             foreach (var f in files)
             {
-                _logger.LogInformation("Processing {File}", f.Location);
+                _logger.LogInformation("Processing {File}", f.RelativePath);
 
                 var content = File.ReadAllText(f.AbsolutePath);
                 var document = Markdown.Parse(content, markdownPipeline);

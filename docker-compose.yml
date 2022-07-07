@@ -12,7 +12,7 @@ services:
     depends_on:
       - meilisearch
     volumes:
-      - appsettings.local.json:/app/appsettings.local.json
+      - ./appsettings.local.json:/app/appsettings.local.json
   api:
     build:
       context: .
@@ -27,7 +27,7 @@ services:
       - meilisearch
       - indexer
     volumes:
-      - appsettings.local.json:/app/appsettings.local.json
+      - ./appsettings.local.json:/app/appsettings.local.json
   meilisearch:
     image: getmeili/meilisearch:latest
     ports:
