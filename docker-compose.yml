@@ -3,7 +3,8 @@
 services:
   indexer:
     build:
-      context: ./Meilidown.Indexer/
+      context: .
+      dockerfile: ./Meilidown.Indexer/Dockerfile
     environment:
       - Meilisearch__Url=http://meilisearch:${MEILISEARCH_PORT:-7700}
       - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
@@ -12,7 +13,8 @@ services:
       - meilisearch
   api:
     build:
-      context: ./Meilidown.API/
+      context: .
+      dockerfile: ./Meilidown.API/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - Meilisearch__Url=http://meilisearch:${MEILISEARCH_PORT:-7700}
