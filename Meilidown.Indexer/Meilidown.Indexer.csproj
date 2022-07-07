@@ -17,15 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.gitignore">
-        <Link>.gitignore</Link>
-      </Content>
-      <Content Include="..\LICENSE">
-        <Link>LICENSE</Link>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Meilidown.Common\Meilidown.Common.csproj" />
     </ItemGroup>
 </Project>
