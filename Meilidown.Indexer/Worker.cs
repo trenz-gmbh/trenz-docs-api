@@ -1,3 +1,8 @@
+using System.Text;
+using Markdig;
+using Markdig.Renderers.Normalize;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using Meilidown.Common;
 using Meilisearch;
 
@@ -19,9 +24,14 @@ namespace Meilidown.Indexer
             while (!stoppingToken.IsCancellationRequested)
             {
                 var files = GatherFiles();
-                await IndexFiles(files, stoppingToken);
+                var indexedFiles = ProcessFiles(files);
+                await UpdateIndex(indexedFiles, stoppingToken);
 
+#if DEBUG
+                Console.ReadKey();
+#else
                 await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+#endif
             }
         }
 
@@ -38,33 +48,60 @@ namespace Meilidown.Indexer
             }
         }
 
-        private async Task IndexFiles(IEnumerable<RepositoryFile> files, CancellationToken cancellationToken)
+        private IEnumerable<IndexedFile> ProcessFiles(IEnumerable<RepositoryFile> files)
         {
-            var client = new MeilisearchClient(_configuration["Meilisearch:Url"], _configuration["Meilisearch:ApiKey"]);
-            var health = await client.HealthAsync(cancellationToken);
-            _logger.LogInformation("Meilisearch is {Status}", health.Status);
+            var markdownPipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .UseEmojiAndSmiley()
+                .UseYamlFrontMatter()
+                .UseDiagrams()
+                .Build();
 
-            // var markdownPipeline = new MarkdownPipelineBuilder()
-            //     .UseAdvancedExtensions()
-            //     .UseEmojiAndSmiley()
-            //     .UseYamlFrontMatter()
-            //     .UseDiagrams()
-            //     .Build();
-
-            var indexedFiles = files.Select(f =>
+            foreach (var f in files)
             {
                 _logger.LogInformation("Processing {File}", f.Location);
 
                 var content = File.ReadAllText(f.AbsolutePath);
-                // var document = Markdown.Parse(content, markdownPipeline);
-                return new IndexedFile(
+                var document = Markdown.Parse(content, markdownPipeline);
+
+                UpdateImageLinks(f, document);
+                
+                var builder = new StringBuilder();
+                var writer = new StringWriter(builder);
+                var renderer = new NormalizeRenderer(writer, new()
+                {
+                    ExpandAutoLinks = false,
+                });
+                renderer.Render(document);
+
+                yield return new(
                     f.Uid,
                     f.Name,
-                    content,
+                    builder.ToString(),
                     0,
                     f.Location
                 );
-            });
+            }
+        }
+
+        private void UpdateImageLinks(RepositoryFile file, MarkdownObject markdownObject)
+        {
+            foreach (var child in markdownObject.Descendants())
+            {
+                if (child is not LinkInline { IsImage: true } link) continue;
+
+                var location = string.Join('/', file.RelativePath.Split('\\').SkipLast(1)) + '/' + link.Url;
+
+                link.Url = string.Format(_configuration["FileApi:Image"], Uri.EscapeDataString(location));
+                if (link.Reference != null) link.Reference.Url = null;
+            }
+        }
+
+        private async Task UpdateIndex(IEnumerable<IndexedFile> indexedFiles, CancellationToken cancellationToken)
+        {
+            var client = new MeilisearchClient(_configuration["Meilisearch:Url"], _configuration["Meilisearch:ApiKey"]);
+            var health = await client.HealthAsync(cancellationToken);
+            _logger.LogInformation("Meilisearch is {Status}", health.Status);
 
             var settings = new Settings
             {

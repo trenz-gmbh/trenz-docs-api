@@ -20,8 +20,8 @@ public class ImageController : ControllerBase
         var path = Uri.UnescapeDataString(location);
         var imageFile = RepositoryRepository
             .GetRepositories(_configuration)
-            .SelectMany(r => r.FindFiles(path))
-            .FirstOrDefault(f => f.RelativePath.Replace('\\', '/') == path);
+            .SelectMany(r => r.FindFiles("**.png"))
+            .FirstOrDefault(f => Path.GetFullPath(Path.Combine(f.Config.Root, f.Config.Path, path)) == f.AbsolutePath);
 
         if (imageFile == null)
             return NotFound();
