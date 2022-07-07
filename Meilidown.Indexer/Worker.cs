@@ -1,4 +1,4 @@
-using LibGit2Sharp;
+using Meilidown.Common;
 using Meilisearch;
 
 namespace Meilidown.Indexer
@@ -25,92 +25,15 @@ namespace Meilidown.Indexer
             }
         }
 
-        private static void UpdateRepository(RepositoryConfiguration config)
-        {
-            Credentials CredentialsHelper(string path, string username, SupportedCredentialTypes supportedCredentialTypes) =>
-                new UsernamePasswordCredentials { Username = config.Username, Password = config.Password };
-
-            var temp = config.Root;
-            if (!Directory.Exists(temp))
-            {
-                Repository.Clone(config.Url, temp, new()
-                    {
-                        BranchName = config.Branch,
-                        CredentialsProvider = CredentialsHelper,
-                    }
-                );
-            }
-
-            using var repo = new Repository(temp);
-            foreach (var remote in repo.Network.Remotes)
-            {
-                var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
-                Commands.Fetch(repo, remote.Name, refSpecs, new()
-                {
-                    CredentialsProvider = CredentialsHelper,
-                }, $"Fetching remote {remote.Name}");
-            }
-
-            if (repo.Head.FriendlyName != config.Branch)
-            {
-                Commands.Checkout(repo, config.Branch);
-            }
-
-            Commands.Pull(
-                repo,
-                new("Meilidown.Indexer", "meilidown@example.com", DateTimeOffset.Now),
-                new()
-                {
-                    MergeOptions = new()
-                    {
-                        MergeFileFavor = MergeFileFavor.Theirs,
-                        FileConflictStrategy = CheckoutFileConflictStrategy.Theirs,
-                    },
-                    FetchOptions = new()
-                    {
-                        CredentialsProvider = CredentialsHelper,
-                    },
-                }
-            );
-        }
-
         private IEnumerable<RepositoryFile> GatherFiles()
         {
-            foreach (var source in _configuration.GetRequiredSection("Sources").GetChildren())
+            foreach (var repository in RepositoryRepository.GetRepositories(_configuration))
             {
-                var repositoryConfig = new RepositoryConfiguration(source);
-                UpdateRepository(repositoryConfig);
+                repository.Update();
 
-                foreach (var repositoryFile in GatherRepositoryFiles(repositoryConfig))
+                foreach (var repositoryFile in repository.FindFiles("**.md"))
                 {
                     yield return repositoryFile;
-                }
-            }
-        }
-
-        private static IEnumerable<RepositoryFile> GatherRepositoryFiles(RepositoryConfiguration config)
-        {
-            var root = Path.Combine(config.Root, config.Path);
-            return IterateDirectory(config, root, root);
-        }
-
-        private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, string path, string root)
-        {
-            foreach (var file in Directory.EnumerateFileSystemEntries(path, "**.md", SearchOption.AllDirectories))
-            {
-                if (File.Exists(file))
-                {
-                    yield return new(config, Path.GetRelativePath(root, file));
-
-                    continue;
-                }
-
-                if (!Directory.Exists(file))
-                    continue;
-
-                foreach (var f in IterateDirectory(config, file, root))
-                {
-                    yield return f;
                 }
             }
         }
@@ -128,7 +51,7 @@ namespace Meilidown.Indexer
             //     .UseDiagrams()
             //     .Build();
 
-            var fils = files.Select(f =>
+            var indexedFiles = files.Select(f =>
             {
                 _logger.LogInformation("Processing {File}", f.Location);
 
@@ -154,7 +77,7 @@ namespace Meilidown.Indexer
             var tasks = new Dictionary<string, Task<TaskInfo>>
             {
                 { "Delete previous index", filesIndex.DeleteAllDocumentsAsync(cancellationToken) },
-                { "Add new index", filesIndex.AddDocumentsAsync(fils, cancellationToken: cancellationToken) },
+                { "Add new index", filesIndex.AddDocumentsAsync(indexedFiles, cancellationToken: cancellationToken) },
                 { "Update index settings", filesIndex.UpdateSettingsAsync(settings, cancellationToken) },
             };
 

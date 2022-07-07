@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Meilidown;
+namespace Meilidown.Common;
 
 public record RepositoryFile(RepositoryConfiguration Config, string RelativePath)
 {

@@ -1,0 +1,88 @@
+﻿using LibGit2Sharp;
+using Microsoft.Extensions.Configuration;
+
+namespace Meilidown.Common;
+
+public static class RepositoryRepository
+{
+    public static IEnumerable<RepositoryConfiguration> GetRepositories(IConfiguration configuration, string key = "Sources")
+    {
+        return configuration.GetRequiredSection(key).GetChildren().Select(source => new RepositoryConfiguration(source));
+    }
+
+    public static void Update(this RepositoryConfiguration config)
+    {
+        Credentials CredentialsHelper(string path, string username, SupportedCredentialTypes supportedCredentialTypes) =>
+            new UsernamePasswordCredentials { Username = config.Username, Password = config.Password };
+
+        var temp = config.Root;
+        if (!Directory.Exists(temp))
+        {
+            Repository.Clone(config.Url, temp, new()
+                {
+                    BranchName = config.Branch,
+                    CredentialsProvider = CredentialsHelper,
+                }
+            );
+        }
+
+        using var repo = new Repository(temp);
+        foreach (var remote in repo.Network.Remotes)
+        {
+            var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
+            Commands.Fetch(repo, remote.Name, refSpecs, new()
+            {
+                CredentialsProvider = CredentialsHelper,
+            }, $"Fetching remote {remote.Name}");
+        }
+
+        if (repo.Head.FriendlyName != config.Branch)
+        {
+            Commands.Checkout(repo, config.Branch);
+        }
+
+        Commands.Pull(
+            repo,
+            new("Meilidown.Indexer", "meilidown@example.com", DateTimeOffset.Now),
+            new()
+            {
+                MergeOptions = new()
+                {
+                    MergeFileFavor = MergeFileFavor.Theirs,
+                    FileConflictStrategy = CheckoutFileConflictStrategy.Theirs,
+                },
+                FetchOptions = new()
+                {
+                    CredentialsProvider = CredentialsHelper,
+                },
+            }
+        );
+    }
+
+    public static IEnumerable<RepositoryFile> FindFiles(this RepositoryConfiguration config, string pattern)
+    {
+        var root = Path.Combine(config.Root, config.Path);
+        return IterateDirectory(config, pattern, root, root);
+    }
+
+    private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, string pattern, string path, string root)
+    {
+        foreach (var file in Directory.EnumerateFileSystemEntries(path, pattern, SearchOption.AllDirectories))
+        {
+            if (File.Exists(file))
+            {
+                yield return new(config, Path.GetRelativePath(root, file));
+
+                continue;
+            }
+
+            if (!Directory.Exists(file))
+                continue;
+
+            foreach (var f in IterateDirectory(config, pattern, file, root))
+            {
+                yield return f;
+            }
+        }
+    }
+}
