@@ -7,6 +7,7 @@ services:
     environment:
       - Meilisearch__Url=http://meilisearch:${MEILISEARCH_PORT:-7700}
       - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
+      - FileApi__Image=https://${API_HOST:-localhost}:${API_PORT:-443}/Image/{0}
     depends_on:
       - meilisearch
   api:
@@ -18,7 +19,7 @@ services:
       - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
     ports:
       - "80:80"
-      - "443:443"
+      - "${API_PORT:-443}:443"
     depends_on:
       - meilisearch
       - indexer
