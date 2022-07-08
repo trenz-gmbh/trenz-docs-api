@@ -26,14 +26,17 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpGet("{**location}")]
-    public async Task<IndexedFile?> ByLocation(string location)
+    public async Task<IActionResult> ByLocation(string location)
     {
+        location = location.EndsWith(".md") ? location[..^3] : location;
         var result = await _client.Index("files").SearchAsync<IndexedFile>("", new()
         {
             Filter = $"location = \"{location}\"",
             Limit = 1,
         });
 
-        return result.Hits.FirstOrDefault();
+        var doc = result.Hits.FirstOrDefault();
+
+        return doc is not null ? Ok(doc) : NotFound();
     }
 }
