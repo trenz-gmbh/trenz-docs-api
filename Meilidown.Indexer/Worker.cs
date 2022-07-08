@@ -49,7 +49,7 @@ namespace Meilidown.Indexer
 
                 _logger.LogInformation("Gathering files from {Repository}", repository);
 
-                foreach (var repositoryFile in repository.FindFiles("**.md"))
+                foreach (var repositoryFile in repository.FindFiles(new(".*\\.md$")))
                 {
                     yield return repositoryFile;
                 }

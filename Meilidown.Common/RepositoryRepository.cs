@@ -1,4 +1,5 @@
-﻿using LibGit2Sharp;
+﻿using System.Text.RegularExpressions;
+using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 
 namespace Meilidown.Common;
@@ -59,15 +60,21 @@ public static class RepositoryRepository
         );
     }
 
-    public static IEnumerable<RepositoryFile> FindFiles(this RepositoryConfiguration config, string pattern)
+    public static IEnumerable<RepositoryFile> FindFiles(this RepositoryConfiguration config, Regex pattern)
     {
         var root = Path.Combine(config.Root, config.Path);
         return IterateDirectory(config, pattern, root, root);
     }
 
-    private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, string pattern, string path, string root)
+    private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, Regex pattern, string path, string root)
     {
-        foreach (var file in Directory.EnumerateFileSystemEntries(path, pattern, SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFileSystemEntries(path, "**", new EnumerationOptions
+                 {
+                     RecurseSubdirectories = true,
+                     MatchType = MatchType.Win32,
+                     IgnoreInaccessible = true,
+                     MatchCasing = MatchCasing.CaseInsensitive,
+                 }).Where(f => pattern.IsMatch(Path.GetFileName(f))))
         {
             if (File.Exists(file))
             {
