@@ -1,4 +1,4 @@
-﻿namespace Meilidown.API;
+﻿namespace Meilidown.API.Models;
 
 public class RepositoryConfiguration
 {

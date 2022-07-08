@@ -3,6 +3,7 @@ using Markdig;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using Meilidown.API.Models;
 using Meilisearch;
 
 namespace Meilidown.API
