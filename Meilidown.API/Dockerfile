@@ -7,8 +7,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY . .
+COPY ["Meilidown.API/Meilidown.API.csproj", "Meilidown.API/"]
 RUN dotnet restore "Meilidown.API/Meilidown.API.csproj"
+COPY . .
 WORKDIR "/src/Meilidown.API"
 RUN dotnet build "Meilidown.API.csproj" -c Release -o /app/build
 

@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Meilidown.Common;
+namespace Meilidown.API;
 
 public record RepositoryFile(RepositoryConfiguration Config, string RelativePath)
 {
@@ -16,6 +16,4 @@ public record RepositoryFile(RepositoryConfiguration Config, string RelativePath
     public string Name => Path.GetFileNameWithoutExtension(RelativePath);
 
     public string Uid => ToMd5(Config.Name + Separator + RelativePath);
-
-    public string? ParentUid => Path.GetRelativePath(Directory.GetParent(AbsolutePath)?.FullName ?? "", Path.Combine(Config.Root, Config.Path)) != "." ? ToMd5(Config.Name + Separator + Directory.GetParent(AbsolutePath)!.Name) : null;
 }

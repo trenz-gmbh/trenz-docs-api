@@ -3,20 +3,21 @@ using Markdig;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
-using Meilidown.Common;
 using Meilisearch;
 
-namespace Meilidown.Indexer
+namespace Meilidown.API
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
         private readonly IConfiguration _configuration;
+        private readonly MeilisearchClient _client;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration)
+        public Worker(ILogger<Worker> logger, IConfiguration configuration, MeilisearchClient client)
         {
             _logger = logger;
             _configuration = configuration;
+            _client = client;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -100,15 +101,14 @@ namespace Meilidown.Indexer
 
                 var location = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1)) + '/' + link.Url;
 
-                link.Url = string.Format(_configuration["FileApi:Image"], Uri.EscapeDataString(location));
+                link.Url = $"{_configuration["ApiHost"]}/File/{Uri.EscapeDataString(location)}";
                 if (link.Reference != null) link.Reference.Url = null;
             }
         }
 
         private async Task UpdateIndex(IEnumerable<IndexedFile> indexedFiles, CancellationToken cancellationToken)
         {
-            var client = new MeilisearchClient(_configuration["Meilisearch:Url"], _configuration["Meilisearch:ApiKey"]);
-            var health = await client.HealthAsync(cancellationToken);
+            var health = await _client.HealthAsync(cancellationToken);
             _logger.LogInformation("Meilisearch is {Status}", health.Status);
 
             var settings = new Settings
@@ -118,7 +118,7 @@ namespace Meilidown.Indexer
                 SearchableAttributes = new[] { "name", "location", "content" },
             };
 
-            var filesIndex = client.Index("files");
+            var filesIndex = _client.Index("files");
             var tasks = new Dictionary<string, Task<TaskInfo>>
             {
                 { "Delete previous index", filesIndex.DeleteAllDocumentsAsync(cancellationToken) },
@@ -129,7 +129,7 @@ namespace Meilidown.Indexer
             foreach (var task in tasks)
             {
                 var info = await task.Value;
-                var result = await client.WaitForTaskAsync(info.Uid, cancellationToken: cancellationToken);
+                var result = await _client.WaitForTaskAsync(info.Uid, cancellationToken: cancellationToken);
                 _logger.LogInformation("Task '{Name}': {Status}", task.Key, result.Status);
 
                 if (result.Error == null) continue;

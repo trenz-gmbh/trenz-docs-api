@@ -1,8 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using LibGit2Sharp;
-using Microsoft.Extensions.Configuration;
 
-namespace Meilidown.Common;
+namespace Meilidown.API;
 
 public static class RepositoryRepository
 {

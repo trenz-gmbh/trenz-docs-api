@@ -4,19 +4,11 @@ A Markdown indexing and API service.
 
 ## Building Docker Images
 
-To build docker images individually, run the following command:
-
-```
-docker build . -f Meilidown.Indexer/Dockerfile
-```
-
-or 
+To build the docker image, run the following command:
 
 ```
 docker build . -f Meilidown.API/Dockerfile
 ```
-
-This ensures the correct context is used.
 
 ## Running the `docker-compose.yml`
 

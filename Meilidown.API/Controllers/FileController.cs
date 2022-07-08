@@ -1,10 +1,9 @@
-﻿using Meilidown.Common;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Meilidown.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class FileController : ControllerBase
 {
     private readonly IConfiguration _configuration;
@@ -14,7 +13,7 @@ public class FileController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpGet("{location}")]
+    [HttpGet("{**location}")]
     public IActionResult Get(string location)
     {
         var path = Uri.UnescapeDataString(location).TrimStart('/');

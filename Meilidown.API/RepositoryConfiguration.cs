@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace Meilidown.Common;
+﻿namespace Meilidown.API;
 
 public class RepositoryConfiguration
 {
