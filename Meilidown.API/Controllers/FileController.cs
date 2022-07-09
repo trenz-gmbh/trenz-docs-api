@@ -14,6 +14,7 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("{**location}")]
+    [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60 * 60 * 24 * 7)]
     public IActionResult Get(string location)
     {
         var path = Uri.UnescapeDataString(location).TrimStart('/');
