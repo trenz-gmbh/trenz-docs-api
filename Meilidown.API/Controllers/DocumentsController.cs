@@ -15,14 +15,43 @@ public class DocumentsController : ControllerBase
         _client = client;
     }
 
-    // TODO: replace All() with GetNavTree()
     [HttpGet]
-    public async Task<IEnumerable<IndexedFile>> All()
+    public async Task<Dictionary<string, NavNode>> NavTree()
     {
-        return await _client.Index("files").GetDocumentsAsync<IndexedFile>(new()
+        var allDocs = await _client.Index("files").GetDocumentsAsync<IndexedFile>(new()
         {
             Limit = 10000,
         });
+        var tree = new Dictionary<string, NavNode>();
+
+        foreach (var doc in allDocs)
+        {
+            var path = doc.location.Split('/');
+            var currentPath = new List<string>();
+            var node = tree;
+            for (var i = 0; i < path.Length; i++)
+            {
+                var part = path[i];
+                currentPath.Add(part);
+
+                if (!node.ContainsKey(part))
+                {
+                    node[part] = new(
+                        doc.uid,
+                        doc.name,
+                        doc.order,
+                        string.Join('/', currentPath)
+                    );
+                }
+
+                if (i + 1 < path.Length)
+                {
+                    node = node[part].children ??= new();
+                }
+            }
+        }
+
+        return tree;
     }
 
     [HttpGet("{**location}")]
