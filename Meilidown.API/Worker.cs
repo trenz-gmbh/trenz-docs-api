@@ -61,10 +61,27 @@ namespace Meilidown.API
         private IEnumerable<IndexedFile> ProcessFiles(IEnumerable<RepositoryFile> files)
         {
             var markdownPipeline = new MarkdownPipelineBuilder()
-                .UseAdvancedExtensions()
+                .UseAbbreviations()
+                // .UseAutoIdentifiers() // causes random "[]:" at the end
+                .UseCitations()
+                .UseCustomContainers()
+                .UseDefinitionLists()
+                .UseEmphasisExtras()
+                .UseFigures()
+                .UseFooters()
+                .UseFootnotes()
+                .UseGridTables()
+                .UseMathematics()
+                .UseMediaLinks()
+                .UsePipeTables()
+                .UseListExtras()
+                .UseTaskLists()
+                .UseDiagrams()
+                .UseAutoLinks()
                 .UseEmojiAndSmiley()
                 .UseYamlFrontMatter()
                 .UseDiagrams()
+                .UseGenericAttributes()
                 .Build();
 
             foreach (var f in files)
@@ -78,10 +95,7 @@ namespace Meilidown.API
                 
                 var builder = new StringBuilder();
                 var writer = new StringWriter(builder);
-                var renderer = new NormalizeRenderer(writer, new()
-                {
-                    ExpandAutoLinks = false,
-                });
+                var renderer = new NormalizeRenderer(writer);
                 renderer.Render(document);
 
                 yield return new(
