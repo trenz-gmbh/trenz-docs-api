@@ -1,5 +1,5 @@
-﻿using Meilidown.Models;
-using Meilisearch;
+﻿using Meilidown.Interfaces;
+using Meilidown.Models.Index;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Meilidown.Controllers;
@@ -8,26 +8,16 @@ namespace Meilidown.Controllers;
 [Route("api/[controller]")]
 public class SearchController : ControllerBase
 {
-    private readonly MeilisearchClient _client;
+    private readonly IIndexingService _indexingService;
 
-    public SearchController(MeilisearchClient client)
+    public SearchController(IIndexingService indexingService)
     {
-        _client = client;
+        _indexingService = indexingService;
     }
 
     [HttpGet]
     public async Task<IEnumerable<SearchResult>> Query([FromQuery] string q)
     {
-        var result = await _client.Index("files").SearchAsync<SearchResult>(q, new()
-        {
-            AttributesToHighlight = new[] { "name", "location", "content" },
-            HighlightPreTag = "<mark>",
-            HighlightPostTag = "</mark>",
-            AttributesToCrop = new[] { "content" },
-            CropLength = 25,
-            AttributesToRetrieve = new[] { "name", "location", "content" },
-        });
-
-        return result.Hits;
+        return await _indexingService.Search(q);
     }
 }

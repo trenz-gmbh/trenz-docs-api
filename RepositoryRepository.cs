@@ -6,12 +6,12 @@ namespace Meilidown;
 
 public static class RepositoryRepository
 {
-    public static IEnumerable<RepositoryConfiguration> GetRepositories(IConfiguration configuration, string key = "Sources")
+    public static IEnumerable<ISourceConfiguration> GetRepositories(IConfiguration configuration, string key = "Sources")
     {
-        return configuration.GetRequiredSection(key).GetChildren().Select(source => new RepositoryConfiguration(source));
+        return configuration.GetRequiredSection(key).GetChildren().Select(source => new GitSourceConfiguration(source));
     }
 
-    public static void Update(this RepositoryConfiguration config)
+    public static void Update(this GitSourceConfiguration config)
     {
         Credentials CredentialsHelper(string path, string username, SupportedCredentialTypes supportedCredentialTypes) =>
             new UsernamePasswordCredentials { Username = config.Username, Password = config.Password };
@@ -60,13 +60,13 @@ public static class RepositoryRepository
         );
     }
 
-    public static IEnumerable<RepositoryFile> FindFiles(this RepositoryConfiguration config, Regex pattern)
+    public static IEnumerable<SourceFile> FindFiles(this GitSourceConfiguration config, Regex pattern)
     {
         var root = Path.Combine(config.Root, config.Path);
         return IterateDirectory(config, pattern, root, root);
     }
 
-    private static IEnumerable<RepositoryFile> IterateDirectory(RepositoryConfiguration config, Regex pattern, string path, string root)
+    private static IEnumerable<SourceFile> IterateDirectory(GitSourceConfiguration config, Regex pattern, string path, string root)
     {
         foreach (var file in Directory.EnumerateFileSystemEntries(path, "**", new EnumerationOptions
                  {

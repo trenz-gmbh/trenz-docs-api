@@ -1,4 +1,4 @@
-﻿namespace Meilidown.Models;
+﻿namespace Meilidown.Models.Index;
 
 // ReSharper disable InconsistentNaming
 

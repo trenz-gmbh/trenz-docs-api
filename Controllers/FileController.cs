@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Meilidown.Interfaces;
+using Meilidown.Models.Sources;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Meilidown.Controllers;
 
@@ -6,11 +8,11 @@ namespace Meilidown.Controllers;
 [Route("api/[controller]")]
 public class FileController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
+    private readonly ISourceService<ISource> _sourceService;
     
-    public FileController(IConfiguration configuration)
+    public FileController(ISourceService<ISource> sourceService)
     {
-        _configuration = configuration;
+        _sourceService = sourceService;
     }
 
     [HttpGet("{**location}")]
@@ -18,10 +20,10 @@ public class FileController : ControllerBase
     public IActionResult Get(string location)
     {
         var path = Uri.UnescapeDataString(location).TrimStart('/');
-        var imageFile = RepositoryRepository
-            .GetRepositories(_configuration)
-            .SelectMany(r => r.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))
-            .FirstOrDefault(f => Path.GetFullPath(Path.Combine(f.Config.Root, f.Config.Path, path)) == f.AbsolutePath);
+        var imageFile = _sourceService
+            .GetSources()
+            .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))
+            .FirstOrDefault(f => Path.GetFullPath(Path.Combine(f.Source.Root, f.Source.Path, path)) == f.AbsolutePath);
 
         if (imageFile == null)
             return NotFound();

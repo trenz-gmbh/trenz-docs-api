@@ -39,7 +39,7 @@ namespace Meilidown
             }
         }
 
-        private IEnumerable<RepositoryFile> GatherFiles()
+        private IEnumerable<SourceFile> GatherFiles()
         {
             _logger.LogInformation("Gathering files...");
             
@@ -58,7 +58,7 @@ namespace Meilidown
             }
         }
 
-        private IEnumerable<IndexedFile> ProcessFiles(IEnumerable<RepositoryFile> files)
+        private IEnumerable<IndexFile> ProcessFiles(IEnumerable<SourceFile> files)
         {
             var markdownPipeline = new MarkdownPipelineBuilder()
                 .UseAbbreviations()
@@ -108,7 +108,7 @@ namespace Meilidown
             }
         }
 
-        private static void UpdateImageLinks(RepositoryFile file, MarkdownObject markdownObject)
+        private static void UpdateImageLinks(SourceFile file, MarkdownObject markdownObject)
         {
             foreach (var child in markdownObject.Descendants())
             {
@@ -121,7 +121,7 @@ namespace Meilidown
             }
         }
 
-        private async Task UpdateIndex(IEnumerable<IndexedFile> indexedFiles, CancellationToken cancellationToken)
+        private async Task UpdateIndex(IEnumerable<IndexFile> indexedFiles, CancellationToken cancellationToken)
         {
             var health = await _client.HealthAsync(cancellationToken);
             _logger.LogInformation("Meilisearch is {Status}", health.Status);

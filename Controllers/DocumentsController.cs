@@ -1,5 +1,5 @@
-﻿using Meilidown.Models;
-using Meilisearch;
+﻿using Meilidown.Interfaces;
+using Meilidown.Models.Index;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Meilidown.Controllers;
@@ -8,20 +8,17 @@ namespace Meilidown.Controllers;
 [Route("api/[controller]/[action]")]
 public class DocumentsController : ControllerBase
 {
-    private readonly MeilisearchClient _client;
+    private readonly IIndexingService _indexingService;
 
-    public DocumentsController(MeilisearchClient client)
+    public DocumentsController(IIndexingService indexingService)
     {
-        _client = client;
+        _indexingService = indexingService;
     }
 
     [HttpGet]
     public async Task<Dictionary<string, NavNode>> NavTree()
     {
-        var allDocs = await _client.Index("files").GetDocumentsAsync<IndexedFile>(new()
-        {
-            Limit = 10000,
-        });
+        var allDocs = await _indexingService.GetIndexedFiles();
         var tree = new Dictionary<string, NavNode>();
 
         foreach (var doc in allDocs)
@@ -58,13 +55,7 @@ public class DocumentsController : ControllerBase
     public async Task<IActionResult> ByLocation(string location)
     {
         location = location.EndsWith(".md") ? location[..^3] : location;
-        var result = await _client.Index("files").SearchAsync<IndexedFile>("", new()
-        {
-            Filter = $"location = \"{location}\"",
-            Limit = 1,
-        });
-
-        var doc = result.Hits.FirstOrDefault();
+        var doc = await _indexingService.GetIndexedFile(location);
 
         return doc is not null ? Ok(doc) : NotFound();
     }
