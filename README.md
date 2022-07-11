@@ -7,7 +7,7 @@ A Markdown indexing and API service.
 To build the docker image, run the following command:
 
 ```
-docker build . -f Meilidown/Dockerfile
+docker build . -f Dockerfile
 ```
 
 ## Running the `docker-compose.yml`
