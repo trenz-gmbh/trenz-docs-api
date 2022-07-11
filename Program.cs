@@ -27,7 +27,6 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithMethods("GET");
-        //policy.WithOrigins(builder.Configuration["FrontendHost"]);
         policy.AllowAnyOrigin();
     });
 });

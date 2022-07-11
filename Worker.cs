@@ -108,7 +108,7 @@ namespace Meilidown
             }
         }
 
-        private void UpdateImageLinks(RepositoryFile file, MarkdownObject markdownObject)
+        private static void UpdateImageLinks(RepositoryFile file, MarkdownObject markdownObject)
         {
             foreach (var child in markdownObject.Descendants())
             {
@@ -116,7 +116,7 @@ namespace Meilidown
 
                 var location = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1)) + '/' + link.Url;
 
-                link.Url = $"{_configuration["ApiHost"]}/File/{Uri.EscapeDataString(location)}";
+                link.Url = $"%API_HOST%File/{location}";
                 if (link.Reference != null) link.Reference.Url = null;
             }
         }
