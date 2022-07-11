@@ -78,7 +78,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
 
             var location = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1)) + '/' + link.Url;
 
-            link.Url = $"%API_HOST%File/{location}";
+            link.Url = $"%API_HOST%File{location}";
             if (link.Reference != null) link.Reference.Url = null;
         }
     }

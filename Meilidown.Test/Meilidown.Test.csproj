@@ -19,4 +19,15 @@
       <ProjectReference Include="..\Meilidown\Meilidown.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Data\Test.md" />
+      <Content Include="Data\Test.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Data\Image.md" />
+      <Content Include="Data\Image.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
