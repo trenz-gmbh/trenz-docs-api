@@ -38,7 +38,7 @@ public class DocumentsController : ControllerBase
                 {
                     node[part] = new(
                         doc.uid,
-                        doc.name,
+                        part,
                         doc.order,
                         string.Join('/', currentPath)
                     );
