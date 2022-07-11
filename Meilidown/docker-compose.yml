@@ -4,7 +4,6 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - Meilisearch__Url=http://meilisearch:7700
