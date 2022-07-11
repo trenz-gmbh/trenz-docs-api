@@ -1,6 +1,6 @@
 ﻿namespace Meilidown.Models.Sources;
 
-public class LocalSource : AbstractFilesystemSource
+public sealed class LocalSource : AbstractFilesystemSource
 {
     private readonly IConfiguration _configuration;
 
@@ -12,6 +12,21 @@ public class LocalSource : AbstractFilesystemSource
     public LocalSource(IConfiguration configuration)
     {
         _configuration = configuration;
+
+        if (!string.Equals(_configuration["Type"], SourceType.Local.GetValue(), StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new ArgumentException("Source type is not local");
+        }
+
+        if (string.IsNullOrEmpty(Name))
+        {
+            throw new ArgumentException("Name is required");
+        }
+        
+        if (string.IsNullOrEmpty(Path))
+        {
+            throw new ArgumentException("Path is required");
+        }
     }
 
     /// <inheritdoc />
