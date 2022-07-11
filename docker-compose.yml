@@ -6,8 +6,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
-      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - Meilisearch__Url=http://meilisearch:7700
       - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
     ports:
