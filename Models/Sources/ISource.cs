@@ -13,4 +13,6 @@ public interface ISource
     public string Path { get; }
 
     public IEnumerable<SourceFile> FindFiles(Regex pattern);
+
+    Task UpdateAsync(CancellationToken cancellationToken = default);
 }

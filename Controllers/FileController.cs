@@ -8,11 +8,11 @@ namespace Meilidown.Controllers;
 [Route("api/[controller]")]
 public class FileController : ControllerBase
 {
-    private readonly ISourceService<ISource> _sourceService;
+    private readonly ISourcesProvider _sourcesProvider;
     
-    public FileController(ISourceService<ISource> sourceService)
+    public FileController(ISourcesProvider sourcesProvider)
     {
-        _sourceService = sourceService;
+        _sourcesProvider = sourcesProvider;
     }
 
     [HttpGet("{**location}")]
@@ -20,7 +20,7 @@ public class FileController : ControllerBase
     public IActionResult Get(string location)
     {
         var path = Uri.UnescapeDataString(location).TrimStart('/');
-        var imageFile = _sourceService
+        var imageFile = _sourcesProvider
             .GetSources()
             .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))
             .FirstOrDefault(f => Path.GetFullPath(Path.Combine(f.Source.Root, f.Source.Path, path)) == f.AbsolutePath);

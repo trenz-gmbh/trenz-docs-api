@@ -1,8 +1,10 @@
 using Meilidown;
+using Meilidown.Interfaces;
+using Meilidown.Services;
 using Meilisearch;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.local.json", optional: true);
+builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddSingleton<MeilisearchClient>(services =>
@@ -11,6 +13,11 @@ builder.Services.AddSingleton<MeilisearchClient>(services =>
 
     return new(configuration["Meilisearch:Url"], configuration["Meilisearch:ApiKey"]);
 });
+
+builder.Services.AddSingleton<IIndexingService, MeilisearchIndexingService>();
+builder.Services.AddSingleton<ISourcesProvider, ConfigurationSourcesProvider>();
+builder.Services.AddSingleton<IFileProcessingService, MarkdownFileProcessingService>();
+
 builder.Services.AddHostedService<Worker>();
 
 builder.Services.AddControllers();

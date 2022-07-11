@@ -15,6 +15,12 @@ public class LocalSource : AbstractFilesystemSource
     }
 
     /// <inheritdoc />
+    public override Task UpdateAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"Local Source: {{Name: {Name}, Root: {Root}, Path: {Path}}}";

@@ -23,6 +23,9 @@ public abstract class AbstractFilesystemSource : ISource
         return IterateDirectory(pattern, root, root);
     }
 
+    /// <inheritdoc />
+    public abstract Task UpdateAsync(CancellationToken cancellationToken = default);
+
     private IEnumerable<SourceFile> IterateDirectory(Regex pattern, string path, string root)
     {
         foreach (var file in Directory.EnumerateFileSystemEntries(path, "**", new EnumerationOptions
