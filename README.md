@@ -2,6 +2,9 @@
 
 A Markdown indexing and API service.
 
+[![.NET](https://github.com/trenz-gmbh/meilidown/actions/workflows/dotnet.yml/badge.svg)](https://github.com/trenz-gmbh/meilidown/actions/workflows/dotnet.yml)
+[![Docker Image CI](https://github.com/trenz-gmbh/meilidown/actions/workflows/docker-image.yml/badge.svg)](https://github.com/trenz-gmbh/meilidown/actions/workflows/docker-image.yml)
+
 ## Building Docker Images
 
 To build the docker image, run the following command:
