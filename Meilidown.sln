@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meilidown.API", "Meilidown.API\Meilidown.API.csproj", "{C14F6E7C-3547-47E7-A322-12833C5180B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meilidown", "Meilidown.csproj", "{C14F6E7C-3547-47E7-A322-12833C5180B0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76F43DDD-9F46-4CAF-91D8-0FABBBE76DAD}"
 	ProjectSection(SolutionItems) = preProject

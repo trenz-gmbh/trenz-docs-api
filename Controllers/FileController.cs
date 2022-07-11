@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Meilidown.API.Controllers;
+namespace Meilidown.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

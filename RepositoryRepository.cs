@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using LibGit2Sharp;
-using Meilidown.API.Models;
+using Meilidown.Models;
 
-namespace Meilidown.API;
+namespace Meilidown;
 
 public static class RepositoryRepository
 {

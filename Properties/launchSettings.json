@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Meilidown.API": {
+    "Meilidown": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

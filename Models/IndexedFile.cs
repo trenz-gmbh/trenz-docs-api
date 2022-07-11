@@ -1,4 +1,4 @@
-﻿namespace Meilidown.API.Models;
+﻿namespace Meilidown.Models;
 
 // ReSharper disable InconsistentNaming
 

@@ -1,4 +1,4 @@
-using Meilidown.API;
+using Meilidown;
 using Meilisearch;
 
 var builder = WebApplication.CreateBuilder(args);

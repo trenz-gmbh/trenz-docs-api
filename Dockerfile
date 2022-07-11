@@ -7,16 +7,15 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["Meilidown.API/Meilidown.API.csproj", "Meilidown.API/"]
-RUN dotnet restore "Meilidown.API/Meilidown.API.csproj"
+COPY ["Meilidown.csproj", "."]
+RUN dotnet restore "Meilidown.csproj"
 COPY . .
-WORKDIR "/src/Meilidown.API"
-RUN dotnet build "Meilidown.API.csproj" -c Release -o /app/build
+RUN dotnet build "Meilidown.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Meilidown.API.csproj" -c Release -o /app/publish
+RUN dotnet publish "Meilidown.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Meilidown.API.dll"]
+ENTRYPOINT ["dotnet", "Meilidown.dll"]

@@ -1,8 +1,8 @@
-﻿using Meilidown.API.Models;
+﻿using Meilidown.Models;
 using Meilisearch;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Meilidown.API.Controllers;
+namespace Meilidown.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
