@@ -1,9 +1,9 @@
 using Meilidown.Models.Sources;
-using Microsoft.Extensions.Configuration;
 
 namespace Meilidown.Test;
 
 [TestClass]
+[TestCategory("Models")]
 public class LocalSourceTest
 {
     public static IEnumerable<object[]> InvalidConfigurationProvider()
@@ -14,7 +14,7 @@ public class LocalSourceTest
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" } } };
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Path", "path" } } };
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Root", "root" } } };
-        yield return new object[] { new Dictionary<string, string> { { "Type", "git" }, { "Name", "name" }, { "Path", "path" } } };
+        yield return new object[] { new Dictionary<string, string> { { "Type", "git" }, { "Name", "name" }, { "Root", "root" } } };
     }
 
     [DataTestMethod]
@@ -23,9 +23,7 @@ public class LocalSourceTest
     {
         Assert.ThrowsException<ArgumentException>(() =>
         {
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(config)
-                .Build();
+            var configuration = TestHelper.GetConfiguration(config);
 
             return new LocalSource(configuration);
         });
@@ -33,33 +31,27 @@ public class LocalSourceTest
     
     public static IEnumerable<object[]> ValidConfigurationProvider()
     {
-        yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Path", "path" } } };
-        yield return new object[] { new Dictionary<string, string> { { "Type", "LOCAL" }, { "Name", "name" }, { "Path", "path" }, { "Root", "root" } } };
-        yield return new object[] { new Dictionary<string, string> { { "Type", "LocAL" }, { "Name", "name" }, { "Path", "path" } } };
+        yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } } };
+        yield return new object[] { new Dictionary<string, string> { { "Type", "LOCAL" }, { "Name", "name" }, { "Root", "root" }, { "Path", "path" } } };
+        yield return new object[] { new Dictionary<string, string> { { "Type", "LocAL" }, { "Name", "name" }, { "Root", "root" } } };
     }
     
     [DataTestMethod]
     [DynamicData(nameof(ValidConfigurationProvider), DynamicDataSourceType.Method)]
     public void TestConstructorDoesNotThrowForValidConfig(Dictionary<string, string> config)
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(config)
-            .Build();
-
+        var configuration = TestHelper.GetConfiguration(config);
         var source = new LocalSource(configuration);
         Assert.AreEqual(SourceType.Local, source.Type);
         Assert.AreEqual(config["Name"], source.Name);
-        Assert.AreEqual(config["Path"], source.Path);
-        Assert.AreEqual(config.ContainsKey("Root") ? config["Root"] : config["Path"], source.Root);
+        Assert.AreEqual(config["Root"], source.Root);
+        Assert.AreEqual(config.ContainsKey("Path") ? config["Path"] : "", source.Path);
     }
 
     [TestMethod]
     public void TestUpdateAsync()
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Path", "path" } })
-            .Build();
-        
+        var configuration = TestHelper.GetConfiguration(new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } });
         var source = new LocalSource(configuration);
         var task = source.UpdateAsync();
         Assert.IsTrue(task.IsCompleted);
@@ -67,17 +59,14 @@ public class LocalSourceTest
 
     public static IEnumerable<object[]> ToStringValuesProvider()
     {
-        yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Path", "path" } }, "Local Source: {Name: name, Root: path, Path: path}" };
+        yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } }, "Local Source: {Name: name, Root: root, Path: }" };
     }
     
     [DataTestMethod]
     [DynamicData(nameof(ToStringValuesProvider), DynamicDataSourceType.Method)]
     public void TestToString(Dictionary<string, string> config, string expected)
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(config)
-            .Build();
-
+        var configuration = TestHelper.GetConfiguration(config);
         var source = new LocalSource(configuration);
         Assert.AreEqual(expected, source.ToString());
     }

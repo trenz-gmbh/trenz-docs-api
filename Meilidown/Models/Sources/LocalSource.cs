@@ -6,8 +6,8 @@ public sealed class LocalSource : AbstractFilesystemSource
 
     public override SourceType Type => SourceType.Local;
     public override string Name => _configuration["Name"];
-    public override string Root => _configuration["Root"] ?? Path;
-    public override string Path => _configuration["Path"];
+    public override string Root => _configuration["Root"];
+    public override string Path => _configuration["Path"] ?? "";
 
     public LocalSource(IConfiguration configuration)
     {
@@ -23,9 +23,9 @@ public sealed class LocalSource : AbstractFilesystemSource
             throw new ArgumentException("Name is required");
         }
         
-        if (string.IsNullOrEmpty(Path))
+        if (string.IsNullOrEmpty(Root))
         {
-            throw new ArgumentException("Path is required");
+            throw new ArgumentException("Root is required");
         }
     }
 
