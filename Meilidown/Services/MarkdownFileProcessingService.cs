@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
+using System.Web;
 using Markdig;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
@@ -76,9 +77,17 @@ public class MarkdownFileProcessingService : IFileProcessingService
         {
             if (child is not LinkInline { IsImage: true } link) continue;
 
-            var location = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1)) + '/' + link.Url;
+            var parent = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
+            parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
 
-            link.Url = $"%API_HOST%File{location}";
+            var location = parent + link.Url;
+            if (location.StartsWith("."))
+            {
+                // only encoding when necessary to get cleaner URLs by default
+                location = HttpUtility.UrlEncode(location);
+            }
+
+            link.Url = $"%API_HOST%/File/{location}";
             if (link.Reference != null) link.Reference.Url = null;
         }
     }
