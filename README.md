@@ -59,4 +59,4 @@ In there you can configure the following settings:
 
 ## Deployment
 
-To deploy a wiki using Meilidown, head to [trenz-gmbh/wikidown](https://github.com/trenz-gmbh/wikidown#deployment).
+To deploy a wiki using Meilidown, head to [trenz-gmbh/wikidown](https://github.com/trenz-gmbh/wikidown#user-content-deployment).
