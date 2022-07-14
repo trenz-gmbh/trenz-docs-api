@@ -26,7 +26,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and test
-      run: docker-compose run -e Meilidown__OneShot=true --rm api
+      run: pushd Meilidown ; docker-compose run -e Meilidown__OneShot=true --rm api ; popd
     - name: Build and push image
       uses: docker/build-push-action@v3
       with:
