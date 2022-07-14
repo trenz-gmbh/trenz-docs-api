@@ -56,3 +56,7 @@ In there you can configure the following settings:
 - `Sources`: An array specifying file sources, which will be included in the Wiki and the index
 
 [Environment]: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/web-host?view=aspnetcore-6.0#environment
+
+## Deployment
+
+To deploy a wiki using Meilidown, head to [trenz-gmbh/wikidown](https://github.com/trenz-gmbh/wikidown#deployment).
