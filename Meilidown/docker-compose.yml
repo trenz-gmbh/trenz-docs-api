@@ -5,6 +5,7 @@ services:
     build:
       context: .
     environment:
+      - Meilidown__OneShot=${Meilidown__OneShot:-false}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - Meilisearch__Url=http://meilisearch:7700
       - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
