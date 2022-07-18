@@ -30,10 +30,11 @@ public abstract class AbstractFilesystemSource : ISource
     {
         foreach (var file in Directory.EnumerateFileSystemEntries(path, "**", new EnumerationOptions
                  {
-                     RecurseSubdirectories = true,
-                     MatchType = MatchType.Win32,
+                     AttributesToSkip = FileAttributes.System,
                      IgnoreInaccessible = true,
                      MatchCasing = MatchCasing.CaseInsensitive,
+                     MatchType = MatchType.Win32,
+                     RecurseSubdirectories = true,
                  }).Where(f => pattern.IsMatch(System.IO.Path.GetFileName(f))))
         {
             if (File.Exists(file))
