@@ -30,14 +30,12 @@ public class MarkdownFileProcessingServiceTest
                     "E36B91F69E929E7E4CE4DE4C6C8A1919",
                     "Test",
                     "# Test",
-                    0,
                     "Test"
                 ),
                 new IndexFile(
                     "AC3AEF213ACC355D71D9E3A708283052",
                     "Image",
                     "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/..%2frelative.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
-                    0,
                     "Image"
                 ),
             },
@@ -57,7 +55,6 @@ public class MarkdownFileProcessingServiceTest
             Assert.AreEqual(expected.uid, output.uid);
             Assert.AreEqual(expected.name, output.name);
             Assert.AreEqual(expected.content, output.content);
-            Assert.AreEqual(expected.order, output.order);
             Assert.AreEqual(expected.location, output.location);
         }
     }

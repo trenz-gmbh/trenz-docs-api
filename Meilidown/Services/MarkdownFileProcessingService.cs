@@ -65,7 +65,6 @@ public class MarkdownFileProcessingService : IFileProcessingService
                     f.Uid,
                     f.Name,
                     builder.ToString(),
-                    0,
                     f.Location
                 );
             }
