@@ -4,7 +4,8 @@ using Meilidown.Models.Sources;
 
 namespace Meilidown.Services
 {
-    public class TreeOrderService:ITreeOrderService
+    /// <inheritdoc/>
+    public class TreeOrderService : ITreeOrderService
     {
         private readonly ISourcesProvider _sourcesProvider;
         private readonly ILogger<TreeOrderService> _logger;
