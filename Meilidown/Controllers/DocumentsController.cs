@@ -68,8 +68,14 @@ public class DocumentsController : ControllerBase
     {
         int i = 0;
 
-        foreach (var treeNode in tree)
-            await SetOrderByParent(treeNode.Value, orderFiles, i++);
+        foreach (var kvp in tree.OrderBy(x => x.Key))
+        {
+            var node = kvp.Value;
+
+            await SetOrderByParent(node, orderFiles, i++);
+        }
+
+        await SetChildrenOrderByOrderFile(new string[] { }, tree.Values, orderFiles);
     }
 
     private async Task SetOrderByParent(NavNode node, Dictionary<string[], SourceFile> orderFiles, int index)
@@ -82,28 +88,34 @@ public class DocumentsController : ControllerBase
         int childIndex = 0;
 
         // recurse all children
-        foreach (var treeNode in node.children)
+        foreach (var treeNode in node.children.OrderBy(x => x.Key))
             await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
 
-        var path = node.location.Split('/');
+        await SetChildrenOrderByOrderFile(node.location.Split('/'), node.children.Values, orderFiles);
+    }
+
+    private async Task SetChildrenOrderByOrderFile(string[] path, IEnumerable<NavNode> children, Dictionary<string[], SourceFile> orderFiles)
+    {
+        if (children == null)
+            return;
 
         // if this particular folder has a .order, override the order
         var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(path));
 
-        if (orderFile.Value != null)
+        if (orderFile.Value == null)
+            return;
+
+        var lines = await System.IO.File.ReadAllLinesAsync(orderFile.Value.AbsolutePath);
+
+        foreach (var item in children)
         {
-            var lines = await System.IO.File.ReadAllLinesAsync(orderFile.Value.AbsolutePath);
+            int newIndex = Array.IndexOf(lines, item.location);
+            item.order = newIndex;
 
-            foreach (var item in node.children)
-            {
-                int newIndex = Array.IndexOf(lines, item.Key);
-                item.Value.order = newIndex;
-
-                if (newIndex < 0)
-                    _logger.LogDebug($"Hiding {item.Value.location}, according to `.order`");
-                else
-                    _logger.LogDebug($"Moving {item.Value.location} to {newIndex}, according to `.order`");
-            }
+            if (newIndex < 0)
+                _logger.LogDebug($"Hiding {item.location}, according to `.order`");
+            else
+                _logger.LogDebug($"Moving {item.location} to {newIndex}, according to `.order`");
         }
     }
 
