@@ -73,7 +73,6 @@ public class DocumentsController : ControllerBase
             await SetOrderByParent(treeNode.Value, orderFiles, i++);
     }
 
-    [NonAction]
     private async Task SetOrderByParent(NavNode node, Dictionary<string[], SourceFile> orderFiles, int index)
     {
         node.order = index;
