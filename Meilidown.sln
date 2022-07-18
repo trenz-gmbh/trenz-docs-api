@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		.github\workflows\docker-image.yml = .github\workflows\docker-image.yml
+		.github\workflows\docker-image-pr.yml = .github\workflows\docker-image-pr.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meilidown.Test", "Meilidown.Test\Meilidown.Test.csproj", "{98B8C4A6-B774-4E4E-A82E-F7D891583B55}"
