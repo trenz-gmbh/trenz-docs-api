@@ -77,33 +77,33 @@ public class DocumentsController : ControllerBase
     {
         node.order = index;
 
-        if (node.children != null)
+        if (node.children == null)
+            return;
+
+        int childIndex = 0;
+
+        // recurse all children
+        foreach (var treeNode in node.children)
+            await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
+
+        var path = node.location.Split('/');
+
+        // if this particular folder has a .order, override the order
+        var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(path));
+
+        if (orderFile.Value != null)
         {
-            int childIndex = 0;
+            var lines = await System.IO.File.ReadAllLinesAsync(orderFile.Value.AbsolutePath);
 
-            // recurse all children
-            foreach (var treeNode in node.children)
-                await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
-
-            var path = node.location.Split('/');
-
-            // if this particular folder has a .order, override the order
-            var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(path));
-
-            if (orderFile.Value != null)
+            foreach (var item in node.children)
             {
-                var lines = await System.IO.File.ReadAllLinesAsync(orderFile.Value.AbsolutePath);
+                int newIndex = Array.IndexOf(lines, item.Key);
+                item.Value.order = newIndex;
 
-                foreach (var item in node.children)
-                {
-                    int newIndex = Array.IndexOf(lines, item.Key);
-                    item.Value.order = newIndex;
-
-                    if (newIndex < 0)
-                        _logger.LogDebug($"Hiding {item.Value.location}, according to `.order`");
-                    else
-                        _logger.LogDebug($"Moving {item.Value.location} to {newIndex}, according to `.order`");
-                }
+                if (newIndex < 0)
+                    _logger.LogDebug($"Hiding {item.Value.location}, according to `.order`");
+                else
+                    _logger.LogDebug($"Moving {item.Value.location} to {newIndex}, according to `.order`");
             }
         }
     }
