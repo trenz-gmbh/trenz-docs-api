@@ -54,10 +54,9 @@ public class DocumentsController : ControllerBase
             }
         }
 
-
         var orderFiles = _sourcesProvider.GetSources()
                                          .SelectMany(source => source.FindFiles(new("\\.order")))
-                                         .ToDictionary(sf => sf.RelativePath.Split('/')[0..^1],
+                                         .ToDictionary(sf => sf.RelativePath.Split(Path.DirectorySeparatorChar)[0..^1],
                                                        sf => sf);
 
         await SetOrder(tree, orderFiles);
