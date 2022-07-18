@@ -109,7 +109,7 @@ public class DocumentsController : ControllerBase
 
         foreach (var item in children)
         {
-            int newIndex = Array.IndexOf(lines, item.location);
+            int newIndex = Array.IndexOf(lines, item.name);
             item.order = newIndex;
 
             if (newIndex < 0)
