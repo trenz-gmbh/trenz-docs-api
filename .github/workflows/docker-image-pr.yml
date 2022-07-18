@@ -1,17 +1,13 @@
-name: Docker Image CI
+name: Docker Image CI (Pull Requests)
 
 on:
-  push:
-    branches: [ "main" ]
+  pull_request:
 
 jobs:
 
   build:
 
     runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
 
     steps:
     - uses: actions/checkout@v3
@@ -25,12 +21,3 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and test
       run: pushd Meilidown ; docker-compose run -e Meilidown__OneShot=true --rm api ; popd
-    - name: Build and push image
-      uses: docker/build-push-action@v3
-      with:
-        context: ./Meilidown
-        platforms: linux/amd64
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}:latest
-          ghcr.io/${{ github.repository }}:${{ github.sha }}
