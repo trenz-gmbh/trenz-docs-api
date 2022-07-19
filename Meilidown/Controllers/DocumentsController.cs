@@ -9,10 +9,16 @@ namespace Meilidown.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
+    private readonly ILogger<DocumentsController> _logger;
+    private readonly ITreeOrderService _orderService;
 
-    public DocumentsController(IIndexingService indexingService)
+    public DocumentsController(IIndexingService indexingService,
+                               ITreeOrderService orderService,
+                               ILogger<DocumentsController> logger)
     {
         _indexingService = indexingService;
+        _orderService = orderService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -36,7 +42,6 @@ public class DocumentsController : ControllerBase
                     node[part] = new(
                         doc.uid,
                         part,
-                        doc.order,
                         string.Join('/', currentPath)
                     );
                 }
@@ -47,6 +52,8 @@ public class DocumentsController : ControllerBase
                 }
             }
         }
+
+        await _orderService.ReorderTree(tree);
 
         return tree;
     }

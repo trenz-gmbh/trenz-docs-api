@@ -4,18 +4,17 @@
 
 public class NavNode
 {
-    public NavNode(string uid, string name, int order, string location, Dictionary<string, NavNode>? children = null)
+    public NavNode(string uid, string name, string location, Dictionary<string, NavNode>? children = null)
     {
         this.uid = uid;
         this.name = name;
-        this.order = order;
         this.location = location;
         this.children = children;
     }
 
     public string uid { get; init; }
     public string name { get; init; }
-    public int order { get; init; }
+    public int order { get; set; } = 0;
     public string location { get; init; }
     public Dictionary<string, NavNode>? children { get; set; }
 

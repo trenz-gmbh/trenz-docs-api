@@ -2,4 +2,4 @@
 
 // ReSharper disable InconsistentNaming
 
-public record IndexFile(string uid, string name, string content, int order, string location);
+public record IndexFile(string uid, string name, string content, string location);
