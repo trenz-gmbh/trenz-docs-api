@@ -14,4 +14,4 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
     - name: Build and test
-      run: pushd Meilidown ; docker-compose run -e Meilidown__OneShot=true --rm api ; popd
+      run: pushd TRENZ.Docs.API ; docker-compose run -e TrenzDocsApi__OneShot=true --rm api ; popd

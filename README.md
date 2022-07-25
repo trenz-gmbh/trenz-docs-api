@@ -1,16 +1,16 @@
-# Meilidown
+# TRENZ.Docs.API
 
-A Markdown indexing and API service.
+An indexing and API service for Markdown documentation.
 
-[![.NET](https://github.com/trenz-gmbh/meilidown/actions/workflows/dotnet.yml/badge.svg)](https://github.com/trenz-gmbh/meilidown/actions/workflows/dotnet.yml)
-[![Docker Image CI](https://github.com/trenz-gmbh/meilidown/actions/workflows/docker-image.yml/badge.svg)](https://github.com/trenz-gmbh/meilidown/actions/workflows/docker-image.yml)
+[![.NET](https://github.com/trenz-gmbh/trenz-docs-api/actions/workflows/dotnet.yml/badge.svg)](https://github.com/trenz-gmbh/trenz-docs-api/actions/workflows/dotnet.yml)
+[![Docker Image CI](https://github.com/trenz-gmbh/trenz-docs-api/actions/workflows/docker-image.yml/badge.svg)](https://github.com/trenz-gmbh/trenz-docs-api/actions/workflows/docker-image.yml)
 
 ## Building Docker Images
 
 To build the docker image, run the following command:
 
 ```
-cd Meilidown
+cd TRENZ.Docs.API
 docker build .
 ```
 
@@ -19,7 +19,7 @@ docker build .
 From the root of the repository, run:
 
 ```
-cd Meilidown
+cd TRENZ.Docs.API
 docker-compose up -d
 ```
 
@@ -59,4 +59,4 @@ In there you can configure the following settings:
 
 ## Deployment
 
-To deploy a wiki using Meilidown, head to [trenz-gmbh/wikidown](https://github.com/trenz-gmbh/wikidown#user-content-deployment).
+To deploy a wiki using TRENZ.Docs.API, head to [trenz-gmbh/trenz-docs](https://github.com/trenz-gmbh/trenz-docs#user-content-deployment).
