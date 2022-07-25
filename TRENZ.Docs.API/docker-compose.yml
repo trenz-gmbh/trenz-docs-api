@@ -1,0 +1,30 @@
+﻿version: '3.4'
+
+services:
+  api:
+    build:
+      context: .
+    environment:
+      - TrenzDocsApi__OneShot=${TrenzDocsApi__OneShot:-false}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - Meilisearch__Url=http://meilisearch:7700
+      - Meilisearch__ApiKey=${MEILISEARCH_API_KEY:-masterKey}
+    ports:
+      - "${API_PORT:-80}:80"
+      - "${API_PORT_SECURE:-443}:443"
+    depends_on:
+      - meilisearch
+    volumes:
+      - ./appsettings.local.json:/app/appsettings.local.json
+  meilisearch:
+    image: getmeili/meilisearch:v0.27.2
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=${MEILISEARCH_API_KEY:-masterKey}
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meili_data:/data
+
+volumes:
+  meili_data:

@@ -20,4 +20,4 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and test
-      run: pushd Meilidown ; docker-compose run -e Meilidown__OneShot=true --rm api ; popd
+      run: pushd TRENZ.Docs.API ; docker-compose run -e TrenzDocsApi__OneShot=true --rm api ; popd
