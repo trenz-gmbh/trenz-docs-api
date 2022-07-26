@@ -18,6 +18,20 @@ public class DocumentsController : ControllerBase
         _orderService = orderService;
     }
 
+    private static string EncodeLocation(string location)
+    {
+        return location
+            .Replace('-', ' ')
+            .Replace("%2D", "-");
+    }
+
+    private static string DecodeLocation(string location)
+    {
+        return location
+            .Replace("-", "%2D")
+            .Replace(' ', '-');
+    }
+
     [HttpGet]
     public async Task<Dictionary<string, NavNode>> NavTree()
     {
@@ -38,7 +52,7 @@ public class DocumentsController : ControllerBase
                 {
                     node[part] = new(
                         doc.uid,
-                        string.Join(NavNode.Separator, currentPath)
+                        EncodeLocation(string.Join(NavNode.Separator, currentPath))
                     );
                 }
 
@@ -58,7 +72,7 @@ public class DocumentsController : ControllerBase
     public async Task<IActionResult> ByLocation(string location)
     {
         location = location.EndsWith(".md") ? location[..^3] : location;
-        var doc = await _indexingService.GetIndexedFile(location);
+        var doc = await _indexingService.GetIndexedFile(DecodeLocation(location));
 
         return doc is not null ? Ok(doc) : NotFound();
     }
