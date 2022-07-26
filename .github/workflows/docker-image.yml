@@ -23,6 +23,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - run: cp ./TRENZ.Docs.API/appsettings.example.json ./TRENZ.Docs.API/appsettings.local.json
     - name: Build and test
       run: pushd TRENZ.Docs.API ; docker-compose run -e TrenzDocsApi__OneShot=true --rm api ; popd
     - name: Build and push image
