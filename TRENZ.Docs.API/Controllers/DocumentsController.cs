@@ -41,14 +41,14 @@ public class DocumentsController : ControllerBase
                 {
                     node[part] = new(
                         doc.uid,
-                        part,
+                        part.Replace('-', ' '),
                         string.Join('/', currentPath)
                     );
                 }
 
                 if (i + 1 < path.Length)
                 {
-                    node = node[part].children ??= new();
+                    node = node[part].Children ??= new();
                 }
             }
         }

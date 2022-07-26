@@ -1,29 +1,30 @@
-﻿namespace TRENZ.Docs.API.Models.Index;
+﻿using System.Text.Json.Serialization;
 
-// ReSharper disable InconsistentNaming
+namespace TRENZ.Docs.API.Models.Index;
+
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 public class NavNode
 {
-    public NavNode(string uid, string name, string location, Dictionary<string, NavNode>? children = null)
+    public const string Root = "";
+
+    public NavNode(string uid, string displayName, string location, Dictionary<string, NavNode>? children = null)
     {
-        this.uid = uid;
-        this.name = name;
-        this.location = location;
-        this.children = children;
+        Uid = uid;
+        DisplayName = displayName;
+        Location = location;
+        Children = children;
     }
 
-    public string uid { get; init; }
-    public string name { get; init; }
-    public int order { get; set; } = 0;
-    public string location { get; init; }
-    public Dictionary<string, NavNode>? children { get; set; }
+    public string Uid { get; }
+    public string DisplayName { get; }
+    public int Order { get; set; }
+    public string Location { get; }
 
-    public void Deconstruct(out string uid, out string name, out int order, out string location, out Dictionary<string, NavNode>? children)
-    {
-        uid = this.uid;
-        name = this.name;
-        order = this.order;
-        location = this.location;
-        children = this.children;
-    }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, NavNode>? Children { get; set; }
+
+    [JsonIgnore]
+    public string NodeName => Location.Split('/').Last();
 }
