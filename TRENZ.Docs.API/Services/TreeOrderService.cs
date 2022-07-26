@@ -54,7 +54,7 @@ namespace TRENZ.Docs.API.Services
             foreach (var treeNode in node.Children.OrderBy(x => x.Key))
                 await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
 
-            await SetChildrenOrderByOrderFile(node.Location.Split('/'), node.Children.Values, orderFiles);
+            await SetChildrenOrderByOrderFile(node.Location.Split(NavNode.Separator), node.Children.Values, orderFiles);
         }
 
         private async Task SetChildrenOrderByOrderFile(string[] path,

@@ -7,7 +7,7 @@ namespace TRENZ.Docs.API.Models.Index;
 
 public class NavNode
 {
-    public const string Root = "";
+    public const char Separator = '/';
 
     public NavNode(string uid, string displayName, string location, Dictionary<string, NavNode>? children = null)
     {
@@ -26,5 +26,5 @@ public class NavNode
     public Dictionary<string, NavNode>? Children { get; set; }
 
     [JsonIgnore]
-    public string NodeName => Location.Split('/').Last();
+    public string NodeName => Location.Split(Separator).Last();
 }

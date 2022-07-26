@@ -29,7 +29,7 @@ public class DocumentsController : ControllerBase
 
         foreach (var doc in allDocs)
         {
-            var path = doc.location.Split('/');
+            var path = doc.location.Split(NavNode.Separator);
             var currentPath = new List<string>();
             var node = tree;
             for (var i = 0; i < path.Length; i++)
@@ -42,7 +42,7 @@ public class DocumentsController : ControllerBase
                     node[part] = new(
                         doc.uid,
                         part.Replace('-', ' '),
-                        string.Join('/', currentPath)
+                        string.Join(NavNode.Separator, currentPath)
                     );
                 }
 
