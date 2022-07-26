@@ -28,7 +28,7 @@ public class LocalSourceTest
             return new LocalSource(configuration);
         });
     }
-    
+
     public static IEnumerable<object[]> ValidConfigurationProvider()
     {
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } } };
@@ -61,7 +61,7 @@ public class LocalSourceTest
     {
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } }, "Local Source: {Name: name, Root: root, Path: }" };
     }
-    
+
     [DataTestMethod]
     [DynamicData(nameof(ToStringValuesProvider), DynamicDataSourceType.Method)]
     public void TestToString(Dictionary<string, string> config, string expected)

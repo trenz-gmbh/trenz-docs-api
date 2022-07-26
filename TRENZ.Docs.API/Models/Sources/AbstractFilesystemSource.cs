@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using IOPath = System.IO.Path;
+using FSPath = System.IO.Path;
 
 namespace TRENZ.Docs.API.Models.Sources;
 
@@ -20,7 +20,7 @@ public abstract class AbstractFilesystemSource : ISource
     /// <inheritdoc />
     public IEnumerable<SourceFile> FindFiles(Regex pattern)
     {
-        var root = IOPath.Combine(Root, Path);
+        var root = FSPath.Combine(Root, Path);
         return IterateDirectory(pattern, root, root);
     }
 
@@ -32,7 +32,7 @@ public abstract class AbstractFilesystemSource : ISource
         var info = new DirectoryInfo(path);
         var fileInfoEnumerable = info.EnumerateFiles("**", new EnumerationOptions
         {
-            AttributesToSkip = FileAttributes.System,
+            AttributesToSkip = FileAttributes.System, // don't skip hidden files such as `.order`
             IgnoreInaccessible = true,
             MatchCasing = MatchCasing.CaseInsensitive,
             MatchType = MatchType.Win32,
@@ -41,6 +41,6 @@ public abstract class AbstractFilesystemSource : ISource
 
         return from file in fileInfoEnumerable
             where file.Exists && pattern.IsMatch(file.Name)
-            select new SourceFile(this, IOPath.GetRelativePath(root, file.FullName));
+            select new SourceFile(this, FSPath.GetRelativePath(root, file.FullName));
     }
 }
