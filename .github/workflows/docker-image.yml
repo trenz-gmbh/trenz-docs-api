@@ -28,7 +28,7 @@ jobs:
     - name: Build and push image
       uses: docker/build-push-action@v3
       with:
-        context: ./Meilidown
+        context: ./TRENZ.Docs.API
         platforms: linux/amd64
         push: true
         tags: |
