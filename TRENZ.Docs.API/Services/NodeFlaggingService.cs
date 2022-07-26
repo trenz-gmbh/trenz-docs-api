@@ -30,8 +30,15 @@ public class NodeFlaggingService : INodeFlaggingService
 
     private static async Task SetContentFlag(Dictionary<string, NavNode> tree, Dictionary<string[], SourceFile> contentFiles)
     {
-        foreach (var node in tree.Values.Where(node => node.Children != null))
+        foreach (var node in tree.Values)
         {
+            if (node.Children == null)
+            {
+                node.HasContent = true; // nodes without children are always content, otherwise they shouldn't appear in the tree
+
+                continue;
+            }
+
             await SetContentFlag(node.Children!, contentFiles);
 
             var contentFile = contentFiles.SingleOrDefault(cf => cf.Key.SequenceEqual(node.Location.Split(NavNode.Separator)));
