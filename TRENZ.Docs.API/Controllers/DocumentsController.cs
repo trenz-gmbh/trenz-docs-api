@@ -9,16 +9,13 @@ namespace TRENZ.Docs.API.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
-    private readonly ILogger<DocumentsController> _logger;
     private readonly ITreeOrderService _orderService;
 
     public DocumentsController(IIndexingService indexingService,
-                               ITreeOrderService orderService,
-                               ILogger<DocumentsController> logger)
+                               ITreeOrderService orderService)
     {
         _indexingService = indexingService;
         _orderService = orderService;
-        _logger = logger;
     }
 
     [HttpGet]
@@ -41,7 +38,6 @@ public class DocumentsController : ControllerBase
                 {
                     node[part] = new(
                         doc.uid,
-                        part.Replace('-', ' '),
                         string.Join(NavNode.Separator, currentPath)
                     );
                 }
