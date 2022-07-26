@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TRENZ.Docs.API.Interfaces;
+using TRENZ.Docs.API.Models.Index;
 
 namespace TRENZ.Docs.API.Controllers;
 
@@ -18,7 +19,7 @@ public class FileController : ControllerBase
     [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60 * 60 * 24 * 7)]
     public IActionResult Get(string location)
     {
-        var path = Uri.UnescapeDataString(location).TrimStart('/');
+        var path = Uri.UnescapeDataString(location).TrimStart(NavNode.Separator);
         var imageFile = _sourcesProvider
             .GetSources()
             .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))

@@ -9,16 +9,27 @@ namespace TRENZ.Docs.API.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
-    private readonly ILogger<DocumentsController> _logger;
     private readonly ITreeOrderService _orderService;
 
     public DocumentsController(IIndexingService indexingService,
-                               ITreeOrderService orderService,
-                               ILogger<DocumentsController> logger)
+                               ITreeOrderService orderService)
     {
         _indexingService = indexingService;
         _orderService = orderService;
-        _logger = logger;
+    }
+
+    private static string EncodeLocation(string location)
+    {
+        return location
+            .Replace('-', ' ')
+            .Replace("%2D", "-");
+    }
+
+    private static string DecodeLocation(string location)
+    {
+        return location
+            .Replace("-", "%2D")
+            .Replace(' ', '-');
     }
 
     [HttpGet]
@@ -29,7 +40,7 @@ public class DocumentsController : ControllerBase
 
         foreach (var doc in allDocs)
         {
-            var path = doc.location.Split('/');
+            var path = doc.location.Split(NavNode.Separator);
             var currentPath = new List<string>();
             var node = tree;
             for (var i = 0; i < path.Length; i++)
@@ -41,14 +52,13 @@ public class DocumentsController : ControllerBase
                 {
                     node[part] = new(
                         doc.uid,
-                        part,
-                        string.Join('/', currentPath)
+                        EncodeLocation(string.Join(NavNode.Separator, currentPath))
                     );
                 }
 
                 if (i + 1 < path.Length)
                 {
-                    node = node[part].children ??= new();
+                    node = node[part].Children ??= new();
                 }
             }
         }
@@ -62,7 +72,7 @@ public class DocumentsController : ControllerBase
     public async Task<IActionResult> ByLocation(string location)
     {
         location = location.EndsWith(".md") ? location[..^3] : location;
-        var doc = await _indexingService.GetIndexedFile(location);
+        var doc = await _indexingService.GetIndexedFile(DecodeLocation(location));
 
         return doc is not null ? Ok(doc) : NotFound();
     }

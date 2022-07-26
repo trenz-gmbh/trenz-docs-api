@@ -43,18 +43,18 @@ namespace TRENZ.Docs.API.Services
 
         private async Task SetOrderByParent(NavNode node, Dictionary<string[], SourceFile> orderFiles, int index)
         {
-            node.order = index;
+            node.Order = index;
 
-            if (node.children == null)
+            if (node.Children == null)
                 return;
 
             int childIndex = 0;
 
             // recurse all children
-            foreach (var treeNode in node.children.OrderBy(x => x.Key))
+            foreach (var treeNode in node.Children.OrderBy(x => x.Key))
                 await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
 
-            await SetChildrenOrderByOrderFile(node.location.Split('/'), node.children.Values, orderFiles);
+            await SetChildrenOrderByOrderFile(node.Location.Split(NavNode.Separator), node.Children.Values, orderFiles);
         }
 
         private async Task SetChildrenOrderByOrderFile(string[] path,
@@ -74,15 +74,11 @@ namespace TRENZ.Docs.API.Services
 
             foreach (var item in children)
             {
-                int newIndex = Array.IndexOf(lines, item.name);
-                item.order = newIndex;
+                var newIndex = Array.IndexOf(lines, item.NodeName);
+                item.Order = newIndex;
 
-                if (newIndex < 0)
-                    _logger.LogDebug($"Hiding {item.location}, according to `.order`");
-                else
-                    _logger.LogDebug($"Moving {item.location} to {newIndex}, according to `.order`");
+                _logger.LogDebug(newIndex < 0 ? $"Hiding {item.Location}, according to `.order`" : $"Moving {item.Location} to {newIndex}, according to `.order`");
             }
         }
     }
 }
-
