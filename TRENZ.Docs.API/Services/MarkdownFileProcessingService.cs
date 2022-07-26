@@ -63,7 +63,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
 
                 yield return new(
                     f.Uid,
-                    f.Name,
+                    f.Name.Replace('-', ' '),
                     builder.ToString(),
                     f.Location
                 );
