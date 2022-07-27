@@ -9,15 +9,13 @@ public class NavNode
 {
     public const char Separator = '/';
 
-    public NavNode(string uid, string location, bool hasContent = false, Dictionary<string, NavNode>? children = null)
+    public NavNode(string location, bool hasContent = false, Dictionary<string, NavNode>? children = null)
     {
         Uid = uid;
         Location = location;
         HasContent = hasContent;
         Children = children;
     }
-
-    public string Uid { get; }
 
     public int Order { get; set; }
 
