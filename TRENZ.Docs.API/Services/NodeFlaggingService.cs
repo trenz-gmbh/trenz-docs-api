@@ -1,5 +1,5 @@
 ﻿using TRENZ.Docs.API.Interfaces;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Sources;
 
 namespace TRENZ.Docs.API.Services;

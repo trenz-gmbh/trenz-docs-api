@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TRENZ.Docs.API.Models.Index;
+namespace TRENZ.Docs.API.Models;
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global

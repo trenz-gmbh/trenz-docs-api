@@ -1,4 +1,4 @@
-﻿using TRENZ.Docs.API.Models.Index;
+﻿using TRENZ.Docs.API.Models;
 
 namespace TRENZ.Docs.API.Interfaces
 {

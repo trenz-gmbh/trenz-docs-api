@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TRENZ.Docs.API.Interfaces;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models;
 
 namespace TRENZ.Docs.API.Controllers;
 
