@@ -18,6 +18,7 @@ builder.Services.AddSingleton<IIndexingService, MeilisearchIndexingService>();
 builder.Services.AddSingleton<ISourcesProvider, ConfigurationSourcesProvider>();
 builder.Services.AddSingleton<IFileProcessingService, MarkdownFileProcessingService>();
 builder.Services.AddSingleton<ITreeOrderService, TreeOrderService>();
+builder.Services.AddSingleton<INodeFlaggingService, NodeFlaggingService>();
 
 builder.Services.AddHostedService<Worker>();
 

@@ -10,12 +10,17 @@ public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
     private readonly ITreeOrderService _orderService;
+    private readonly INodeFlaggingService _flaggingService;
 
-    public DocumentsController(IIndexingService indexingService,
-                               ITreeOrderService orderService)
+    public DocumentsController(
+        IIndexingService indexingService,
+        ITreeOrderService orderService,
+        INodeFlaggingService flaggingService
+    )
     {
         _indexingService = indexingService;
         _orderService = orderService;
+        _flaggingService = flaggingService;
     }
 
     private static string EncodeLocation(string location)
@@ -64,6 +69,7 @@ public class DocumentsController : ControllerBase
         }
 
         await _orderService.ReorderTree(tree);
+        await _flaggingService.UpdateHasContentFlag(tree);
 
         return tree;
     }
