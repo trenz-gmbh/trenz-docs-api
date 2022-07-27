@@ -23,14 +23,14 @@ public class DocumentsController : ControllerBase
         _flaggingService = flaggingService;
     }
 
-    private static string EncodeLocation(string location)
+    public static string EncodeLocation(string location)
     {
         return location
             .Replace('-', ' ')
             .Replace("%2D", "-");
     }
 
-    private static string DecodeLocation(string location)
+    public static string DecodeLocation(string location)
     {
         return location
             .Replace("-", "%2D")

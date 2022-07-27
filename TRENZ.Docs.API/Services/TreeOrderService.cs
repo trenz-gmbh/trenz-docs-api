@@ -1,4 +1,5 @@
-﻿using TRENZ.Docs.API.Interfaces;
+﻿using TRENZ.Docs.API.Controllers;
+using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Index;
 using TRENZ.Docs.API.Models.Sources;
 
@@ -74,7 +75,7 @@ namespace TRENZ.Docs.API.Services
 
             foreach (var item in children)
             {
-                var newIndex = Array.IndexOf(lines, item.NodeName);
+                var newIndex = Array.IndexOf(lines, DocumentsController.DecodeLocation(item.NodeName));
                 item.Order = newIndex;
 
                 _logger.LogDebug(newIndex < 0 ? $"Hiding {item.Location}, according to `.order`" : $"Moving {item.Location} to {newIndex}, according to `.order`");
