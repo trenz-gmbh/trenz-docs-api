@@ -6,6 +6,7 @@ using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using TRENZ.Docs.API.Interfaces;
+using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Index;
 using TRENZ.Docs.API.Models.Sources;
 
@@ -63,9 +64,9 @@ public class MarkdownFileProcessingService : IFileProcessingService
 
                 yield return new(
                     f.Uid,
-                    f.Name.Replace('-', ' '),
+                    NavNode.PathToLocation(f.Name),
                     builder.ToString(),
-                    f.Location
+                    NavNode.PathToLocation(f.NormalizedRelativePath)
                 );
             }
     }

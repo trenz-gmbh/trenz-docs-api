@@ -11,7 +11,9 @@ public record SourceFile(ISource Source, string RelativePath)
 
     public string AbsolutePath => Path.Combine(Source.Root, Source.Path, RelativePath).Replace('/', Path.DirectorySeparatorChar);
 
-    public string Location => string.Join('.', RelativePath.Split('.').SkipLast(1)).Replace(Path.DirectorySeparatorChar, '/');
+    public string RelativePathWithoutExtension => string.Join('.', RelativePath.Split('.').SkipLast(1));
+
+    public string NormalizedRelativePath => RelativePathWithoutExtension.Replace(Path.DirectorySeparatorChar, NavNode.Separator);
 
     public string Name => Path.GetFileNameWithoutExtension(RelativePath);
 
