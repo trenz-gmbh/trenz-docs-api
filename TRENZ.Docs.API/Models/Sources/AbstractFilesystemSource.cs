@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using FSPath = System.IO.Path;
 
 namespace TRENZ.Docs.API.Models.Sources;
 
@@ -19,7 +20,7 @@ public abstract class AbstractFilesystemSource : ISource
     /// <inheritdoc />
     public IEnumerable<SourceFile> FindFiles(Regex pattern)
     {
-        var root = System.IO.Path.Combine(Root, Path);
+        var root = FSPath.Combine(Root, Path);
         return IterateDirectory(pattern, root, root);
     }
 
@@ -28,29 +29,18 @@ public abstract class AbstractFilesystemSource : ISource
 
     private IEnumerable<SourceFile> IterateDirectory(Regex pattern, string path, string root)
     {
-        foreach (var file in Directory.EnumerateFileSystemEntries(path, "**", new EnumerationOptions
-                 {
-                     AttributesToSkip = FileAttributes.System,
-                     IgnoreInaccessible = true,
-                     MatchCasing = MatchCasing.CaseInsensitive,
-                     MatchType = MatchType.Win32,
-                     RecurseSubdirectories = true,
-                 }).Where(f => pattern.IsMatch(System.IO.Path.GetFileName(f))))
+        var dir = new DirectoryInfo(path);
+        var fileInfoEnumerable = dir.EnumerateFiles("**", new EnumerationOptions
         {
-            if (File.Exists(file))
-            {
-                yield return new(this, System.IO.Path.GetRelativePath(root, file));
+            AttributesToSkip = FileAttributes.System, // don't skip hidden files such as `.order`
+            IgnoreInaccessible = true,
+            MatchCasing = MatchCasing.CaseInsensitive,
+            MatchType = MatchType.Win32,
+            RecurseSubdirectories = true,
+        });
 
-                continue;
-            }
-
-            if (!Directory.Exists(file))
-                continue;
-
-            foreach (var f in IterateDirectory(pattern, file, root))
-            {
-                yield return f;
-            }
-        }
+        return from file in fileInfoEnumerable
+            where file.Exists && pattern.IsMatch(file.Name)
+            select new SourceFile(this, FSPath.GetRelativePath(root, file.FullName));
     }
 }

@@ -28,14 +28,14 @@ public class LocalSourceTest
             return new LocalSource(configuration);
         });
     }
-    
+
     public static IEnumerable<object[]> ValidConfigurationProvider()
     {
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } } };
         yield return new object[] { new Dictionary<string, string> { { "Type", "LOCAL" }, { "Name", "name" }, { "Root", "root" }, { "Path", "path" } } };
         yield return new object[] { new Dictionary<string, string> { { "Type", "LocAL" }, { "Name", "name" }, { "Root", "root" } } };
     }
-    
+
     [DataTestMethod]
     [DynamicData(nameof(ValidConfigurationProvider), DynamicDataSourceType.Method)]
     public void TestConstructorDoesNotThrowForValidConfig(Dictionary<string, string> config)
@@ -61,7 +61,7 @@ public class LocalSourceTest
     {
         yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } }, "Local Source: {Name: name, Root: root, Path: }" };
     }
-    
+
     [DataTestMethod]
     [DynamicData(nameof(ToStringValuesProvider), DynamicDataSourceType.Method)]
     public void TestToString(Dictionary<string, string> config, string expected)
@@ -69,5 +69,34 @@ public class LocalSourceTest
         var configuration = TestHelper.GetConfiguration(config);
         var source = new LocalSource(configuration);
         Assert.AreEqual(expected, source.ToString());
+    }
+
+    public static IEnumerable<object[]> FindFilesValuesProvider()
+    {
+        yield return new object[]
+        {
+            ".*\\.md$",
+            new Dictionary<string, string> { { "Type", "local" }, { "Name", "Test" }, { "Root", "./Data/" } },
+            new[] { "Image.md", "Test.md", "Nested" + Path.DirectorySeparatorChar + "Text.md" },
+        };
+
+        yield return new object[]
+        {
+            "\\.order",
+            new Dictionary<string, string> { { "Type", "local" }, { "Name", "Test" }, { "Root", "./Data/" } },
+            new[] { ".order", "Nested" + Path.DirectorySeparatorChar + ".order" },
+        };
+    }
+
+    [DataTestMethod]
+    [DynamicData(nameof(FindFilesValuesProvider), DynamicDataSourceType.Method)]
+    public void TestFindFiles(string pattern, Dictionary<string, string> config, IEnumerable<string> relativePaths)
+    {
+        var configuration = TestHelper.GetConfiguration(config);
+        var source = new LocalSource(configuration);
+
+        var files = source.FindFiles(new(pattern)).Select(sf => sf.RelativePath);
+
+        Assert.IsTrue(relativePaths.SequenceEqual(files));
     }
 }

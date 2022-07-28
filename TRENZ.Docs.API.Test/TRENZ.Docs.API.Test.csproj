@@ -28,6 +28,18 @@
       <Content Include="Data\Image.md">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Data\.order" />
+      <Content Include="Data\.order">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Data\Nested\Text.md" />
+      <Content Include="Data\Nested\Text.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Data\Nested\.order" />
+      <Content Include="Data\Nested\.order">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
