@@ -25,7 +25,7 @@ public class LocalSourceTest
         {
             var configuration = TestHelper.GetConfiguration(config);
 
-            return new LocalSource(configuration);
+            return LocalSource.FromConfiguration(configuration);
         });
     }
 
@@ -41,7 +41,7 @@ public class LocalSourceTest
     public void TestConstructorDoesNotThrowForValidConfig(Dictionary<string, string> config)
     {
         var configuration = TestHelper.GetConfiguration(config);
-        var source = new LocalSource(configuration);
+        var source = LocalSource.FromConfiguration(configuration);
         Assert.AreEqual(SourceType.Local, source.Type);
         Assert.AreEqual(config["Name"], source.Name);
         Assert.AreEqual(config["Root"], source.Root);
@@ -52,7 +52,7 @@ public class LocalSourceTest
     public void TestUpdateAsync()
     {
         var configuration = TestHelper.GetConfiguration(new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } });
-        var source = new LocalSource(configuration);
+        var source = LocalSource.FromConfiguration(configuration);
         var task = source.UpdateAsync();
         Assert.IsTrue(task.IsCompleted);
     }
@@ -67,7 +67,7 @@ public class LocalSourceTest
     public void TestToString(Dictionary<string, string> config, string expected)
     {
         var configuration = TestHelper.GetConfiguration(config);
-        var source = new LocalSource(configuration);
+        var source = LocalSource.FromConfiguration(configuration);
         Assert.AreEqual(expected, source.ToString());
     }
 
@@ -93,7 +93,7 @@ public class LocalSourceTest
     public void TestFindFiles(string pattern, Dictionary<string, string> config, IEnumerable<string> relativePaths)
     {
         var configuration = TestHelper.GetConfiguration(config);
-        var source = new LocalSource(configuration);
+        var source = LocalSource.FromConfiguration(configuration);
 
         var files = source.FindFiles(new(pattern)).Select(sf => sf.RelativePath);
 

@@ -50,7 +50,7 @@ namespace TRENZ.Docs.API
             _lifetime.StopApplication();
         }
 
-        private async IAsyncEnumerable<SourceFile> GatherFiles([EnumeratorCancellation] CancellationToken cancellationToken)
+        private async IAsyncEnumerable<ISourceFile> GatherFiles([EnumeratorCancellation] CancellationToken cancellationToken)
         {
             _logger.LogInformation("Gathering files...");
             

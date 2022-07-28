@@ -2,31 +2,40 @@
 
 public sealed class LocalSource : AbstractFilesystemSource
 {
-    private readonly IConfiguration _configuration;
-
-    public override SourceType Type => SourceType.Local;
-    public override string Name => _configuration["Name"];
-    public override string Root => _configuration["Root"];
-    public override string Path => _configuration["Path"] ?? "";
-
-    public LocalSource(IConfiguration configuration)
+    public static LocalSource FromConfiguration(IConfiguration configuration)
     {
-        _configuration = configuration;
-
-        if (!string.Equals(_configuration["Type"], SourceType.Local.GetValue(), StringComparison.InvariantCultureIgnoreCase))
+        if (!string.Equals(configuration["Type"], SourceType.Local.GetValue(), StringComparison.InvariantCultureIgnoreCase))
         {
             throw new ArgumentException("Source type is not local");
         }
 
-        if (string.IsNullOrEmpty(Name))
+        if (string.IsNullOrEmpty(configuration["Name"]))
         {
             throw new ArgumentException("Name is required");
         }
         
-        if (string.IsNullOrEmpty(Root))
+        if (string.IsNullOrEmpty(configuration["Root"]))
         {
             throw new ArgumentException("Root is required");
         }
+
+        return new(
+            configuration["Name"],
+            configuration["Root"],
+            configuration["Path"] ?? ""
+        );
+    }
+    
+    public override SourceType Type => SourceType.Local;
+    public override string Name { get; }
+    public override string Root { get; }
+    public override string Path { get; }
+
+    public LocalSource(string name, string root, string path = "")
+    {
+        Name = name;
+        Root = root;
+        Path = path;
     }
 
     /// <inheritdoc />

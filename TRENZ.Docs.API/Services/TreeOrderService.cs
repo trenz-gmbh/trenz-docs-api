@@ -27,7 +27,7 @@ namespace TRENZ.Docs.API.Services
             await SetOrder(tree, orderFiles);
         }
 
-        private async Task SetOrder(Dictionary<string, NavNode> tree, Dictionary<string[], SourceFile> orderFiles)
+        private async Task SetOrder(Dictionary<string, NavNode> tree, Dictionary<string[], ISourceFile> orderFiles)
         {
             int i = 0;
 
@@ -41,7 +41,7 @@ namespace TRENZ.Docs.API.Services
             await SetChildrenOrderByOrderFile(new string[] { }, tree.Values, orderFiles);
         }
 
-        private async Task SetOrderByParent(NavNode node, Dictionary<string[], SourceFile> orderFiles, int index)
+        private async Task SetOrderByParent(NavNode node, Dictionary<string[], ISourceFile> orderFiles, int index)
         {
             node.Order = index;
 
@@ -59,7 +59,7 @@ namespace TRENZ.Docs.API.Services
 
         private async Task SetChildrenOrderByOrderFile(IEnumerable<string> pathParts,
                                                        IEnumerable<NavNode> children,
-                                                       Dictionary<string[], SourceFile> orderFiles)
+                                                       Dictionary<string[], ISourceFile> orderFiles)
         {
             if (children == null)
                 return;
@@ -70,7 +70,7 @@ namespace TRENZ.Docs.API.Services
             if (orderFile.Value == null)
                 return;
 
-            var lines = await File.ReadAllLinesAsync(orderFile.Value.AbsolutePath);
+            var lines = await orderFile.Value.GetLinesAsync();
 
             foreach (var item in children)
             {

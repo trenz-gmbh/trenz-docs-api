@@ -22,7 +22,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
     }
     
     /// <inheritdoc />
-    public async IAsyncEnumerable<IndexFile> ProcessAsync(IAsyncEnumerable<SourceFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<IndexFile> ProcessAsync(IAsyncEnumerable<ISourceFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
             var markdownPipeline = new MarkdownPipelineBuilder()
                 // .UseAbbreviations()
@@ -52,7 +52,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
             {
                 _logger.LogInformation("Processing {File}", f.RelativePath);
 
-                var content = await File.ReadAllTextAsync(f.AbsolutePath, cancellationToken);
+                var content = await f.GetTextAsync(cancellationToken);
                 var document = Markdown.Parse(content, markdownPipeline);
 
                 UpdateImageLinks(f, document);
@@ -64,14 +64,14 @@ public class MarkdownFileProcessingService : IFileProcessingService
 
                 yield return new(
                     f.Uid,
-                    NavNode.PathToLocation(f.Name),
+                    f.Name,
                     builder.ToString(),
-                    NavNode.PathToLocation(f.NormalizedRelativePath)
+                    f.Location
                 );
             }
     }
 
-    private static void UpdateImageLinks(SourceFile file, MarkdownObject markdownObject)
+    private static void UpdateImageLinks(ISourceFile file, MarkdownObject markdownObject)
     {
         foreach (var child in markdownObject.Descendants())
         {
