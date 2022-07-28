@@ -2,7 +2,6 @@
 
 public enum SourceType
 {
-    Unknown = -1,
     Git,
     Local,
 }
@@ -16,16 +15,6 @@ public static class SourceTypeExtensions
             SourceType.Git => "Git",
             SourceType.Local => "Local",
             _ => "Unknown",
-        };
-    }
-
-    public static SourceType FromString(string sourceType)
-    {
-        return sourceType switch
-        {
-            "Git" => SourceType.Git,
-            "Local" => SourceType.Local,
-            _ => SourceType.Unknown,
         };
     }
 }
