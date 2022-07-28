@@ -35,7 +35,7 @@ public class LocalSourceTest
         yield return new object[] { new Dictionary<string, string> { { "Type", "LOCAL" }, { "Name", "name" }, { "Root", "root" }, { "Path", "path" } } };
         yield return new object[] { new Dictionary<string, string> { { "Type", "LocAL" }, { "Name", "name" }, { "Root", "root" } } };
     }
-    
+
     [DataTestMethod]
     [DynamicData(nameof(ValidConfigurationProvider), DynamicDataSourceType.Method)]
     public void TestConstructorDoesNotThrowForValidConfig(Dictionary<string, string> config)
@@ -69,5 +69,22 @@ public class LocalSourceTest
         var configuration = TestHelper.GetConfiguration(config);
         var source = new LocalSource(configuration);
         Assert.AreEqual(expected, source.ToString());
+    }
+
+    public static IEnumerable<object[]> FindFilesValuesProvider()
+    {
+        yield return new object[] { new Dictionary<string, string> { { "Type", "local" }, { "Name", "Test" }, { "Root", "./Data/" } }, new[] { "Image", "Test" } };
+    }
+
+    [DataTestMethod]
+    [DynamicData(nameof(FindFilesValuesProvider), DynamicDataSourceType.Method)]
+    public void TestFindFiles(Dictionary<string, string> config, IEnumerable<string> locations)
+    {
+        var configuration = TestHelper.GetConfiguration(config);
+        var source = new LocalSource(configuration);
+
+        var files = source.FindFiles(new(".*\\.md$")).Select(sf => sf.Location);
+
+        Assert.IsTrue(locations.SequenceEqual(files));
     }
 }
