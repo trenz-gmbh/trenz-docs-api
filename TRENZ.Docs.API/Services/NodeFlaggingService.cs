@@ -1,5 +1,5 @@
 ﻿using TRENZ.Docs.API.Interfaces;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Sources;
 
 namespace TRENZ.Docs.API.Services;
@@ -18,11 +18,10 @@ public class NodeFlaggingService : INodeFlaggingService
     {
         var contentFiles = _sourcesProvider.GetSources()
                 .SelectMany(source => source.FindFiles(new(".*\\.md$")))
-                .ToDictionary(sf =>
-                {
-                    var parts = sf.RelativePath.Split(Path.DirectorySeparatorChar);
-                    return parts[..^1].Union(new[] { parts[^1][..^3] }).ToArray();
-                }, sf => sf)
+                .ToDictionary(
+                    sf => NavNode.PathToLocation(sf.NormalizedRelativePath).Split(NavNode.Separator),
+                    sf => sf
+                )
             ;
 
         await SetContentFlag(tree, contentFiles);
@@ -41,7 +40,7 @@ public class NodeFlaggingService : INodeFlaggingService
 
             await SetContentFlag(node.Children!, contentFiles);
 
-            var contentFile = contentFiles.SingleOrDefault(cf => cf.Key.SequenceEqual(node.Location.Split(NavNode.Separator)));
+            var contentFile = contentFiles.SingleOrDefault(cf => cf.Key.SequenceEqual(node.LocationParts));
             node.HasContent = contentFile.Value != null;
         }
     }

@@ -1,5 +1,5 @@
 ﻿using TRENZ.Docs.API.Interfaces;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Sources;
 
 namespace TRENZ.Docs.API.Services
@@ -54,10 +54,10 @@ namespace TRENZ.Docs.API.Services
             foreach (var treeNode in node.Children.OrderBy(x => x.Key))
                 await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
 
-            await SetChildrenOrderByOrderFile(node.Location.Split(NavNode.Separator), node.Children.Values, orderFiles);
+            await SetChildrenOrderByOrderFile(node.LocationParts, node.Children.Values, orderFiles);
         }
 
-        private async Task SetChildrenOrderByOrderFile(string[] path,
+        private async Task SetChildrenOrderByOrderFile(IEnumerable<string> pathParts,
                                                        IEnumerable<NavNode> children,
                                                        Dictionary<string[], SourceFile> orderFiles)
         {
@@ -65,7 +65,7 @@ namespace TRENZ.Docs.API.Services
                 return;
 
             // if this particular folder has a .order, override the order
-            var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(path));
+            var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(pathParts));
 
             if (orderFile.Value == null)
                 return;
@@ -74,7 +74,7 @@ namespace TRENZ.Docs.API.Services
 
             foreach (var item in children)
             {
-                var newIndex = Array.IndexOf(lines, item.NodeName);
+                var newIndex = Array.IndexOf(lines, item.FileName);
                 item.Order = newIndex;
 
                 _logger.LogDebug(newIndex < 0 ? $"Hiding {item.Location}, according to `.order`" : $"Moving {item.Location} to {newIndex}, according to `.order`");
