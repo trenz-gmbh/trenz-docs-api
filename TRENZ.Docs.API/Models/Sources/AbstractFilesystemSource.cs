@@ -29,8 +29,8 @@ public abstract class AbstractFilesystemSource : ISource
 
     private IEnumerable<SourceFile> IterateDirectory(Regex pattern, string path, string root)
     {
-        var info = new DirectoryInfo(path);
-        var fileInfoEnumerable = info.EnumerateFiles("**", new EnumerationOptions
+        var dir = new DirectoryInfo(path);
+        var fileInfoEnumerable = dir.EnumerateFiles("**", new EnumerationOptions
         {
             AttributesToSkip = FileAttributes.System, // don't skip hidden files such as `.order`
             IgnoreInaccessible = true,
