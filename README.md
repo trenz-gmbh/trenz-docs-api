@@ -20,6 +20,7 @@ From the root of the repository, run:
 
 ```
 cd TRENZ.Docs.API
+cp appsettings.example.json appsettings.local.json
 docker-compose up -d
 ```
 
@@ -34,7 +35,7 @@ Additionally, you can add a `.env` file to specify environment variables:
 
 ## Available Settings
 
-You can place a `appsettings.local.json` file in next to the `docker-compose.yml` and it will get loaded on application startup.
+You MUST place a `appsettings.local.json` file in next to the `docker-compose.yml` and it will get loaded on application startup.
 In there you can configure the following settings:
 
 ```json
