@@ -35,7 +35,7 @@ Additionally, you can add a `.env` file to specify environment variables:
 
 ## Available Settings
 
-You MUST place a `appsettings.local.json` file in next to the `docker-compose.yml` and it will get loaded on application startup.
+You can place a `appsettings.local.json` file next to the `docker-compose.yml`, which will get loaded on application startup.
 In there you can configure the following settings:
 
 ```json
@@ -49,12 +49,18 @@ In there you can configure the following settings:
       "Path": "docs/public/",
       "Username": "username",
       "Password": "password"
+    },
+    {
+      "Name": "My General Docs",
+      "Type": "local",
+      "Root": "/opt/wiki/",
+      "Path": "docs/public/"
     }
   ]
 }
 ```
 
-- `Sources`: An array specifying file sources, which will be included in the Wiki and the index
+- `Sources`: An array specifying sources, which will be included in the Wiki and the index. `Type` can be `git` or `local`. See above for all available fields.
 
 [Environment]: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/web-host?view=aspnetcore-6.0#environment
 
