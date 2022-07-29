@@ -18,7 +18,7 @@ public abstract class AbstractFilesystemSource : ISource
     public abstract string Path { get; }
 
     /// <inheritdoc />
-    public IEnumerable<SourceFile> FindFiles(Regex pattern)
+    public IEnumerable<ISourceFile> FindFiles(Regex pattern)
     {
         var root = FSPath.Combine(Root, Path);
         return IterateDirectory(pattern, root, root);
@@ -27,7 +27,7 @@ public abstract class AbstractFilesystemSource : ISource
     /// <inheritdoc />
     public abstract Task UpdateAsync(CancellationToken cancellationToken = default);
 
-    private IEnumerable<SourceFile> IterateDirectory(Regex pattern, string path, string root)
+    private IEnumerable<PhysicalSourceFile> IterateDirectory(Regex pattern, string path, string root)
     {
         var dir = new DirectoryInfo(path);
         var fileInfoEnumerable = dir.EnumerateFiles("**", new EnumerationOptions
@@ -41,6 +41,6 @@ public abstract class AbstractFilesystemSource : ISource
 
         return from file in fileInfoEnumerable
             where file.Exists && pattern.IsMatch(file.Name)
-            select new SourceFile(this, FSPath.GetRelativePath(root, file.FullName));
+            select new PhysicalSourceFile(this, FSPath.GetRelativePath(root, file.FullName));
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
 
@@ -17,24 +18,23 @@ public class FileController : ControllerBase
 
     [HttpGet("{**location}")]
     [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60 * 60 * 24 * 7)]
-    public IActionResult Get(string location)
+    public async Task<IActionResult> Get(string location)
     {
-        var path = Uri.UnescapeDataString(location).TrimStart(NavNode.Separator);
+        var normalizedLocation = Uri.UnescapeDataString(location).TrimStart(NavNode.Separator);
         var imageFile = _sourcesProvider
             .GetSources()
             .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))
-            .FirstOrDefault(f => Path.GetFullPath(Path.Combine(f.Source.Root, f.Source.Path, path)) == f.AbsolutePath);
+            .FirstOrDefault(sf => sf.Location == normalizedLocation);
 
         if (imageFile == null)
             return NotFound();
 
-        return PhysicalFile(imageFile.AbsolutePath, Path.GetExtension(imageFile.AbsolutePath) switch
-        {
-            ".png" => "image/png",
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".gif" => "image/gif",
-            ".json" => "application/json",
-            _ => "application/octet-stream",
-        });
+        var typeProvider = new FileExtensionContentTypeProvider();
+        if (!typeProvider.TryGetContentType(imageFile.RelativePath, out var contentType))
+            contentType = "application/octet-stream";
+
+        // MAYBE: restrict allowed content types?
+
+        return File(await imageFile.GetBytesAsync(), contentType);
     }
 }

@@ -19,7 +19,7 @@ public class NodeFlaggingService : INodeFlaggingService
         var contentFiles = _sourcesProvider.GetSources()
                 .SelectMany(source => source.FindFiles(new(".*\\.md$")))
                 .ToDictionary(
-                    sf => NavNode.PathToLocation(sf.NormalizedRelativePath).Split(NavNode.Separator),
+                    sf => sf.Location.Split(NavNode.Separator),
                     sf => sf
                 )
             ;
@@ -27,7 +27,7 @@ public class NodeFlaggingService : INodeFlaggingService
         await SetContentFlag(tree, contentFiles);
     }
 
-    private static async Task SetContentFlag(Dictionary<string, NavNode> tree, Dictionary<string[], SourceFile> contentFiles)
+    private static async Task SetContentFlag(Dictionary<string, NavNode> tree, Dictionary<string[], ISourceFile> contentFiles)
     {
         foreach (var node in tree.Values)
         {

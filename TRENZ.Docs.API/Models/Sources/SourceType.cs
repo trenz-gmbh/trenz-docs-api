@@ -4,6 +4,7 @@ public enum SourceType
 {
     Git,
     Local,
+    Memory,
 }
 
 public static class SourceTypeExtensions
@@ -14,6 +15,7 @@ public static class SourceTypeExtensions
         {
             SourceType.Git => "Git",
             SourceType.Local => "Local",
+            SourceType.Memory => "Memory",
             _ => "Unknown",
         };
     }

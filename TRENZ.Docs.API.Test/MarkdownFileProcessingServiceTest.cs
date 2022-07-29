@@ -10,19 +10,14 @@ public class MarkdownFileProcessingServiceTest
 {
     public static IEnumerable<object[]> ProcessFileDataProvider()
     {
-        var testConfig = new LocalSource(TestHelper.GetConfiguration(new Dictionary<string, string>
-        {
-            { "Name", "Test" },
-            { "Type", "Local" },
-            { "Root", "./Data" },
-        }));
-        
+        var testConfig = new LocalSource("Test", "./Data" );
+
         yield return new object[]
         {
             new[]
             {
-                new SourceFile(testConfig, "Test.md"),
-                new SourceFile(testConfig, "Image.md"),
+                new PhysicalSourceFile(testConfig, "Test.md"),
+                new PhysicalSourceFile(testConfig, "Image.md"),
             },
             new[]
             {
@@ -44,7 +39,7 @@ public class MarkdownFileProcessingServiceTest
 
     [DataTestMethod]
     [DynamicData(nameof(ProcessFileDataProvider), DynamicDataSourceType.Method)]
-    public async Task TestProcessAsync(IEnumerable<SourceFile> sourceFiles, IEnumerable<IndexFile> expectedFiles)
+    public async Task TestProcessAsync(IEnumerable<PhysicalSourceFile> sourceFiles, IEnumerable<IndexFile> expectedFiles)
     {
         var logger = TestHelper.GetLogger<MarkdownFileProcessingService>();
         var service = new MarkdownFileProcessingService(logger);

@@ -75,6 +75,7 @@ public class NavNode
     public static string PathToLocation(string path)
     {
         return path
+            .Replace(Path.DirectorySeparatorChar, Separator)
             .Replace('-', ' ')
             .Replace("%2D", "-");
     }
@@ -87,6 +88,7 @@ public class NavNode
     public static string LocationToPath(string location)
     {
         return location
+            .Replace(Separator, Path.DirectorySeparatorChar)
             .Replace("-", "%2D")
             .Replace(' ', '-');
     }
