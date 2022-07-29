@@ -17,6 +17,7 @@ builder.Services.AddSingleton<MeilisearchClient>(services =>
 builder.Services.AddSingleton<IIndexingService, MeilisearchIndexingService>();
 builder.Services.AddSingleton<ISourcesProvider, ConfigurationSourcesProvider>();
 builder.Services.AddSingleton<IFileProcessingService, MarkdownFileProcessingService>();
+builder.Services.AddSingleton<ITreeBuildingService, TreeBuildingService>();
 builder.Services.AddSingleton<ITreeOrderService, TreeOrderService>();
 builder.Services.AddSingleton<INodeFlaggingService, NodeFlaggingService>();
 
