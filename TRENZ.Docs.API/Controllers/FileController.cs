@@ -24,7 +24,7 @@ public class FileController : ControllerBase
         var imageFile = _sourcesProvider
             .GetSources()
             .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))
-            .FirstOrDefault(sf => sf.Location == normalizedLocation);
+            .FirstOrDefault(sf => sf.RelativePath == Path.GetRelativePath(".", normalizedLocation));
 
         if (imageFile == null)
             return NotFound();
