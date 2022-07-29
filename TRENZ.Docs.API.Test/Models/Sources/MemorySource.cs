@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using TRENZ.Docs.API.Models.Sources;
 
-namespace TRENZ.Docs.API.Models.Sources;
+namespace TRENZ.Docs.API.Test.Models.Sources;
 
 public class MemorySource : ISource
 {

@@ -1,7 +1,7 @@
 ﻿using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Sources;
 
-namespace TRENZ.Docs.API.Services;
+namespace TRENZ.Docs.API.Test.Services;
 
 public class MemorySourcesProvider : ISourcesProvider
 {

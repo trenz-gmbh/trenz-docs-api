@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using TRENZ.Docs.API.Models;
+using TRENZ.Docs.API.Models.Sources;
 
-namespace TRENZ.Docs.API.Models.Sources;
+namespace TRENZ.Docs.API.Test.Models.Sources;
 
 public class MemorySourceFile : ISourceFile
 {

@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Sources;
 using TRENZ.Docs.API.Services;
+using TRENZ.Docs.API.Test.Models.Sources;
+using TRENZ.Docs.API.Test.Services;
 
 namespace TRENZ.Docs.API.Test;
 
