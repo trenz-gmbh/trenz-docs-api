@@ -29,11 +29,11 @@ public class DocumentsController : ControllerBase
     [HttpGet]
     public async Task<Dictionary<string, NavNode>> NavTree()
     {
-        var indexFiles = await _indexingService.GetIndexedFiles();
+        var indexFiles = (await _indexingService.GetIndexedFiles()).ToList();
         var tree = await _buildingService.BuildTreeAsync(indexFiles);
 
         await _orderService.ReorderTree(tree);
-        await _flaggingService.UpdateHasContentFlag(tree);
+        await _flaggingService.UpdateHasContentFlag(tree, indexFiles);
 
         return tree;
     }
