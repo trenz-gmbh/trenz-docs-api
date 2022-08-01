@@ -2,6 +2,7 @@ using TRENZ.Docs.API;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Services;
 using Meilisearch;
+using TRENZ.Docs.API.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
@@ -20,6 +21,8 @@ builder.Services.AddSingleton<IFileProcessingService, MarkdownFileProcessingServ
 builder.Services.AddSingleton<ITreeBuildingService, TreeBuildingService>();
 builder.Services.AddSingleton<ITreeOrderService, TreeOrderService>();
 builder.Services.AddSingleton<INodeFlaggingService, NodeFlaggingService>();
+
+builder.Services.AddScoped<IAuthProvider, SimpleJwtAuthProvider>();
 
 builder.Services.AddHostedService<Worker>();
 
