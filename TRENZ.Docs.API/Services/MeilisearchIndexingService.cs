@@ -48,7 +48,7 @@ public class MeilisearchIndexingService : IIndexingService
                  })
         {
             var info = await task.Value;
-            var result = await _client.WaitForTaskAsync(info.Uid, cancellationToken: cancellationToken);
+            var result = await _client.WaitForTaskAsync(info.TaskUid, cancellationToken: cancellationToken);
             _logger.LogInformation("Task '{Name}': {Status}", task.Key, result.Status);
 
             if (result.Error == null) continue;
@@ -62,10 +62,12 @@ public class MeilisearchIndexingService : IIndexingService
     /// <inheritdoc />
     public async Task<IEnumerable<IndexFile>> GetIndexedFiles(CancellationToken cancellationToken = default)
     {
-        return await GetIndex().GetDocumentsAsync<IndexFile>(new()
+        var results = await GetIndex().GetDocumentsAsync<IndexFile>(new()
         {
             Limit = 10000,
         }, cancellationToken);
+
+        return results.Results;
     }
 
     /// <inheritdoc />

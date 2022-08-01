@@ -17,7 +17,7 @@ services:
     volumes:
       - ./appsettings.local.json:/app/appsettings.local.json
   meilisearch:
-    image: getmeili/meilisearch:v0.27.2
+    image: getmeili/meilisearch:v0.28.1
     ports:
       - "7700:7700"
     environment:
