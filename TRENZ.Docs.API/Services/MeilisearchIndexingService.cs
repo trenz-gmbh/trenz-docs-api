@@ -83,9 +83,9 @@ public class MeilisearchIndexingService : IIndexingService
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<SearchResult>> Search(string query, CancellationToken cancellationToken = default)
+    public async Task<SearchResults> Search(string query, int? limit = null, int? offset = null, CancellationToken cancellationToken = default)
     {
-        var result = await GetIndex().SearchAsync<SearchResult>(query, new()
+        var indexResult = await GetIndex().SearchAsync<SearchResult>(query, new()
         {
             AttributesToHighlight = new[] { "name", "location", "content" },
             HighlightPreTag = "<mark>",
@@ -93,9 +93,17 @@ public class MeilisearchIndexingService : IIndexingService
             AttributesToCrop = new[] { "content" },
             CropLength = 25,
             AttributesToRetrieve = new[] { "name", "location", "content" },
+            Limit = limit,
+            Offset = offset,
         }, cancellationToken);
 
-        return result.Hits;
+        return new(
+            indexResult.EstimatedTotalHits,
+            indexResult.ProcessingTimeMs,
+            indexResult.Hits,
+            indexResult.Limit,
+            indexResult.Offset
+        );
     }
 
     /// <inheritdoc />
