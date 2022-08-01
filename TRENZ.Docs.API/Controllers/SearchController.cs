@@ -5,7 +5,7 @@ using TRENZ.Docs.API.Models.Index;
 namespace TRENZ.Docs.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]/[action]")]
 public class SearchController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
@@ -19,5 +19,11 @@ public class SearchController : ControllerBase
     public async Task<IEnumerable<SearchResult>> Query([FromQuery] string q)
     {
         return await _indexingService.Search(q);
+    }
+
+    [HttpGet]
+    public async Task<IndexStats> Stats()
+    {
+        return await _indexingService.GetStats();
     }
 }

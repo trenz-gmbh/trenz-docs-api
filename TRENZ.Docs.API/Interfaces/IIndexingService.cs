@@ -8,4 +8,5 @@ public interface IIndexingService
     Task<IEnumerable<IndexFile>> GetIndexedFiles(CancellationToken cancellationToken = default);
     Task<IndexFile?> GetIndexedFile(string location, CancellationToken cancellationToken = default);
     Task<IEnumerable<SearchResult>> Search(string query, CancellationToken cancellationToken = default);
+    Task<IndexStats> GetStats(CancellationToken cancellationToken = default);
 }

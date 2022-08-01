@@ -2,6 +2,7 @@
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Index;
 using Index = Meilisearch.Index;
+using IndexStats = TRENZ.Docs.API.Models.Index.IndexStats;
 
 namespace TRENZ.Docs.API.Services;
 
@@ -11,6 +12,8 @@ public class MeilisearchIndexingService : IIndexingService
 
     private readonly MeilisearchClient _client;
     private readonly ILogger<MeilisearchIndexingService> _logger;
+
+    private DateTimeOffset _lastIndexingTime;
 
     public MeilisearchIndexingService(MeilisearchClient client, ILogger<MeilisearchIndexingService> logger)
     {
@@ -52,6 +55,8 @@ public class MeilisearchIndexingService : IIndexingService
 
             _logger.LogError("{@Error}", string.Join(Environment.NewLine, result.Error.Values));
         }
+
+        _lastIndexingTime = DateTimeOffset.UtcNow;
     }
 
     /// <inheritdoc />
@@ -89,5 +94,17 @@ public class MeilisearchIndexingService : IIndexingService
         }, cancellationToken);
 
         return result.Hits;
+    }
+
+    /// <inheritdoc />
+    public async Task<IndexStats> GetStats(CancellationToken cancellationToken = default)
+    {
+        var stats = await GetIndex().GetStatsAsync(cancellationToken);
+
+        return new(
+            _lastIndexingTime,
+            stats.NumberOfDocuments,
+            stats.IsIndexing
+        );
     }
 }
