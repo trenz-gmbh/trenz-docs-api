@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Sources;
-using TRENZ.Docs.API.Services;
 using TRENZ.Docs.API.Test.Models.Sources;
 using TRENZ.Docs.API.Test.Services;
 
@@ -38,5 +37,36 @@ public static class TestHelper
     {
         var source = new LocalSource("Test", path);
         return new MemorySourcesProvider(new[] { source });
+    }
+
+    public static bool DeepSequenceEquals<T>(this IEnumerable<T>? a, IEnumerable<T>? b, Func<T, IEnumerable<T>?> childSelector, IEqualityComparer<T>? comparer = null)
+    {
+        comparer ??= EqualityComparer<T>.Default;
+
+        if (a is null && b is null)
+            return true;
+
+        if (a is null || b is null)
+            return false;
+
+        var aList = a.ToList();
+        var bList = b.ToList();
+
+        if (aList.Count != bList.Count)
+            return false;
+
+        for (var i = 0; i < aList.Count; i++)
+        {
+            var aItem = aList[i];
+            var bItem = bList[i];
+
+            if (!comparer.Equals(aItem, bItem))
+                return false;
+
+            if (!DeepSequenceEquals(childSelector(aItem), childSelector(bItem), childSelector, comparer))
+                return false;
+        }
+
+        return true;
     }
 }

@@ -9,16 +9,19 @@ namespace TRENZ.Docs.API.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
+    private readonly ITreeBuildingService _buildingService;
     private readonly ITreeOrderService _orderService;
     private readonly INodeFlaggingService _flaggingService;
 
     public DocumentsController(
         IIndexingService indexingService,
+        ITreeBuildingService buildingService,
         ITreeOrderService orderService,
         INodeFlaggingService flaggingService
     )
     {
         _indexingService = indexingService;
+        _buildingService = buildingService;
         _orderService = orderService;
         _flaggingService = flaggingService;
     }
@@ -26,33 +29,11 @@ public class DocumentsController : ControllerBase
     [HttpGet]
     public async Task<Dictionary<string, NavNode>> NavTree()
     {
-        var allDocs = await _indexingService.GetIndexedFiles();
-        var tree = new Dictionary<string, NavNode>();
-
-        foreach (var doc in allDocs)
-        {
-            var path = doc.location.Split(NavNode.Separator);
-            var currentPath = new List<string>();
-            var node = tree;
-            for (var i = 0; i < path.Length; i++)
-            {
-                var part = path[i];
-                currentPath.Add(part);
-
-                if (!node.ContainsKey(part))
-                {
-                    node[part] = new(string.Join(NavNode.Separator, currentPath));
-                }
-
-                if (i + 1 < path.Length)
-                {
-                    node = node[part].Children ??= new();
-                }
-            }
-        }
+        var indexFiles = (await _indexingService.GetIndexedFiles()).ToList();
+        var tree = await _buildingService.BuildTreeAsync(indexFiles);
 
         await _orderService.ReorderTree(tree);
-        await _flaggingService.UpdateHasContentFlag(tree);
+        await _flaggingService.UpdateHasContentFlag(tree, indexFiles);
 
         return tree;
     }

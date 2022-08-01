@@ -1,33 +1,13 @@
 ﻿using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
-using TRENZ.Docs.API.Models.Sources;
+using TRENZ.Docs.API.Models.Index;
 
 namespace TRENZ.Docs.API.Services;
 
 public class NodeFlaggingService : INodeFlaggingService
 {
-    private readonly ISourcesProvider _sourcesProvider;
-
-    public NodeFlaggingService(ISourcesProvider sourcesProvider)
-    {
-        _sourcesProvider = sourcesProvider;
-    }
-
     /// <inheritdoc />
-    public async Task UpdateHasContentFlag(Dictionary<string, NavNode> tree)
-    {
-        var contentFiles = _sourcesProvider.GetSources()
-                .SelectMany(source => source.FindFiles(new(".*\\.md$")))
-                .ToDictionary(
-                    sf => sf.Location.Split(NavNode.Separator),
-                    sf => sf
-                )
-            ;
-
-        await SetContentFlag(tree, contentFiles);
-    }
-
-    private static async Task SetContentFlag(Dictionary<string, NavNode> tree, Dictionary<string[], ISourceFile> contentFiles)
+    public async Task UpdateHasContentFlag(Dictionary<string, NavNode> tree, List<IndexFile> indexFiles)
     {
         foreach (var node in tree.Values)
         {
@@ -38,10 +18,9 @@ public class NodeFlaggingService : INodeFlaggingService
                 continue;
             }
 
-            await SetContentFlag(node.Children!, contentFiles);
+            await UpdateHasContentFlag(node.Children!, indexFiles);
 
-            var contentFile = contentFiles.SingleOrDefault(cf => cf.Key.SequenceEqual(node.LocationParts));
-            node.HasContent = contentFile.Value != null;
+            node.HasContent = indexFiles.Any(f => f.location == node.Location);
         }
     }
 }
