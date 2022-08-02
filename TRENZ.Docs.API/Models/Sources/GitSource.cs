@@ -24,7 +24,7 @@ public class GitSource : AbstractFilesystemSource
     }
     
     /// <inheritdoc />
-    public override async Task UpdateAsync(CancellationToken cancellationToken = default)
+    public override Task UpdateAsync(CancellationToken cancellationToken = default)
     {
         Credentials CredentialsHelper(string path, string username, SupportedCredentialTypes supportedCredentialTypes) =>
             new UsernamePasswordCredentials { Username = Username, Password = Password };
@@ -81,6 +81,8 @@ public class GitSource : AbstractFilesystemSource
                 },
             }
         );
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
