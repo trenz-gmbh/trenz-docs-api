@@ -34,13 +34,15 @@ public class SimpleJwtAuthProvider : IAuthProvider
 
         b.Query = query.ToString();
 
-        return Task.FromResult<IActionResult>(new RedirectResult(b.ToString()));
+        return Task.FromResult<IActionResult>(new RedirectResult(b.ToString(), false, false));
     }
 
     /// <inheritdoc />
-    public async Task<AuthenticateResult?> Process(HttpRequest request)
+    public Task<AuthenticateResult?> Process(HttpRequest request)
     {
-        return await request.ReadFromJsonAsync<AuthenticateResult>();
+        var result = new AuthenticateResult(bool.Parse(request.Query["success"].ToString()), request.Query["token"].ToString());
+
+        return Task.FromResult<AuthenticateResult?>(result);
     }
 
     private string GenerateSignature(string payload)

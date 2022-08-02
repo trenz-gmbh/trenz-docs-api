@@ -15,13 +15,18 @@ public class AuthController : ControllerBase
         _authProvider = authProvider;
     }
 
+    [HttpGet]
     public async Task<IActionResult> Redirect()
     {
-        var request = new AuthenticateRequest(Url.Action("Callback", "Auth")!, "#3a6"); // TODO: get branding information from configuration
+        var returnUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
+
+        // TODO: get branding information from configuration
+        var request = new AuthenticateRequest(returnUrl, "#3a6");
 
         return await _authProvider.RedirectToLoginPage(request);
     }
 
+    [HttpGet]
     public async Task<IActionResult> Callback()
     {
         var result = await _authProvider.Process(HttpContext.Request);
