@@ -5,43 +5,35 @@ using TRENZ.Docs.API.Models.Sources;
 namespace TRENZ.Docs.API.Services
 {
     /// <inheritdoc/>
-    public class TreeOrderService : ITreeOrderService
+    public class NavNodeOrderingService : INavNodeOrderingService
     {
         private readonly ISourcesProvider _sourcesProvider;
-        private readonly ILogger<TreeOrderService> _logger;
+        private readonly ILogger<NavNodeOrderingService> _logger;
 
-        public TreeOrderService(ISourcesProvider sourcesProvider,
-                                ILogger<TreeOrderService> logger)
+        public NavNodeOrderingService(ISourcesProvider sourcesProvider,
+                                ILogger<NavNodeOrderingService> logger)
         {
             _sourcesProvider = sourcesProvider;
             _logger = logger;
         }
 
-        public async Task ReorderTree(Dictionary<string, NavNode> tree)
+        public async Task ReorderTreeAsync(NavTree tree, CancellationToken cancellationToken = default)
         {
             var orderFiles = _sourcesProvider.GetSources()
                                              .SelectMany(source => source.FindFiles(new("\\.order")))
-                                             .ToDictionary(sf => sf.RelativePath.Split(Path.DirectorySeparatorChar)[0..^1],
+                                             .ToDictionary(sf => sf.RelativePath.Split(Path.DirectorySeparatorChar)[..^1],
                                                            sf => sf);
 
-            await SetOrder(tree, orderFiles);
-        }
-
-        private async Task SetOrder(Dictionary<string, NavNode> tree, Dictionary<string[], ISourceFile> orderFiles)
-        {
-            int i = 0;
-
-            foreach (var kvp in tree.OrderBy(x => x.Key))
+            var i = 0;
+            foreach (var (_, node) in tree.Root.OrderBy(x => x.Key))
             {
-                var node = kvp.Value;
-
-                await SetOrderByParent(node, orderFiles, i++);
+                await SetOrderByParent(node, orderFiles, i++, cancellationToken);
             }
 
-            await SetChildrenOrderByOrderFile(new string[] { }, tree.Values, orderFiles);
+            await SetChildrenOrderByOrderFile(Array.Empty<string>(), tree.Root.Values, orderFiles, cancellationToken);
         }
 
-        private async Task SetOrderByParent(NavNode node, Dictionary<string[], ISourceFile> orderFiles, int index)
+        private async Task SetOrderByParent(NavNode node, Dictionary<string[], ISourceFile> orderFiles, int index, CancellationToken cancellationToken)
         {
             node.Order = index;
 
@@ -52,14 +44,15 @@ namespace TRENZ.Docs.API.Services
 
             // recurse all children
             foreach (var treeNode in node.Children.OrderBy(x => x.Key))
-                await SetOrderByParent(treeNode.Value, orderFiles, childIndex++);
+                await SetOrderByParent(treeNode.Value, orderFiles, childIndex++, cancellationToken);
 
-            await SetChildrenOrderByOrderFile(node.LocationParts, node.Children.Values, orderFiles);
+            await SetChildrenOrderByOrderFile(node.LocationParts, node.Children.Values, orderFiles, cancellationToken);
         }
 
         private async Task SetChildrenOrderByOrderFile(IEnumerable<string> pathParts,
                                                        IEnumerable<NavNode> children,
-                                                       Dictionary<string[], ISourceFile> orderFiles)
+                                                       Dictionary<string[], ISourceFile> orderFiles,
+                                                       CancellationToken cancellationToken = default)
         {
             if (children == null)
                 return;
@@ -70,7 +63,7 @@ namespace TRENZ.Docs.API.Services
             if (orderFile.Value == null)
                 return;
 
-            var lines = await orderFile.Value.GetLinesAsync();
+            var lines = await orderFile.Value.GetLinesAsync(cancellationToken);
 
             foreach (var item in children)
             {

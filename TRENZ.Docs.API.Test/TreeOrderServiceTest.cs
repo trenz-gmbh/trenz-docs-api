@@ -19,8 +19,8 @@ public class TreeOrderServiceTest
             new MemorySourceFile("uid3","Middle", "Middle", "I'm in the middle"),
             new MemorySourceFile("uid4","Hidden", "Hidden", "I'm hidden"),
         });
-        var logger = TestHelper.GetLogger<TreeOrderService>();
-        var service = new TreeOrderService(sources, logger);
+        var logger = TestHelper.GetLogger<NavNodeOrderingService>();
+        var service = new NavNodeOrderingService(sources, logger);
 
         var tree = new Dictionary<string, NavNode>
         {
@@ -47,8 +47,8 @@ public class TreeOrderServiceTest
             new MemorySourceFile("uid4","Hidden", "Hidden", "I'm hidden"),
             new MemorySourceFile("uid5",".order", ".order", "Start\r\nMiddle\r\nEnd"),
         });
-        var logger = TestHelper.GetLogger<TreeOrderService>();
-        var service = new TreeOrderService(sources, logger);
+        var logger = TestHelper.GetLogger<NavNodeOrderingService>();
+        var service = new NavNodeOrderingService(sources, logger);
 
         var tree = new Dictionary<string, NavNode>
         {

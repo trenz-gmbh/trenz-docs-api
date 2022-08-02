@@ -1,10 +1,11 @@
+using Meilisearch;
 using TRENZ.Docs.API;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Services;
-using Meilisearch;
 using TRENZ.Docs.API.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
@@ -18,11 +19,12 @@ builder.Services.AddSingleton<MeilisearchClient>(services =>
 builder.Services.AddSingleton<IIndexingService, MeilisearchIndexingService>();
 builder.Services.AddSingleton<ISourcesProvider, ConfigurationSourcesProvider>();
 builder.Services.AddSingleton<IFileProcessingService, MarkdownFileProcessingService>();
-builder.Services.AddSingleton<ITreeBuildingService, TreeBuildingService>();
-builder.Services.AddSingleton<ITreeOrderService, TreeOrderService>();
-builder.Services.AddSingleton<INodeFlaggingService, NodeFlaggingService>();
+builder.Services.AddSingleton<INavTreeProvider, NavTreeProvider>();
+builder.Services.AddSingleton<INavNodeOrderingService, NavNodeOrderingService>();
+builder.Services.AddSingleton<INavNodeFlaggingService, NavNodeFlaggingService>();
+builder.Services.AddSingleton<INavNodeAuthorizationService, NavNodeAuthorizationService>();
 
-builder.Services.AddScoped<IAuthProvider, SimpleJwtAuthProvider>();
+builder.Services.AddAuthAdapter();
 
 builder.Services.AddHostedService<Worker>();
 
@@ -40,7 +42,8 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithMethods("GET");
-        policy.AllowAnyOrigin();
+        policy.AllowCredentials();
+        policy.WithOrigins("https://rbo-1.trenz.ag", "http://localhost:8080");
     });
 });
 
@@ -50,6 +53,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthorization();

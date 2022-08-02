@@ -9,40 +9,41 @@ namespace TRENZ.Docs.API.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
-    private readonly ITreeBuildingService _buildingService;
-    private readonly ITreeOrderService _orderService;
-    private readonly INodeFlaggingService _flaggingService;
+    private readonly INavTreeProvider _navTreeProvider;
+    private readonly IAuthAdapter _authAdapter;
 
     public DocumentsController(
         IIndexingService indexingService,
-        ITreeBuildingService buildingService,
-        ITreeOrderService orderService,
-        INodeFlaggingService flaggingService
+        INavTreeProvider navTreeProvider,
+        IAuthAdapter authAdapter
     )
     {
         _indexingService = indexingService;
-        _buildingService = buildingService;
-        _orderService = orderService;
-        _flaggingService = flaggingService;
+        _navTreeProvider = navTreeProvider;
+        _authAdapter = authAdapter;
+    }
+
+    private async Task<NavTree> GetFilteredTree(CancellationToken cancellationToken)
+    {
+        var claims = await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
+
+        return _navTreeProvider.Tree.WithoutHiddenNodes().FilterByGroups(claims ?? Array.Empty<string>());
     }
 
     [HttpGet]
-    public async Task<Dictionary<string, NavNode>> NavTree()
-    {
-        var indexFiles = (await _indexingService.GetIndexedFiles()).ToList();
-        var tree = await _buildingService.BuildTreeAsync(indexFiles);
-
-        await _orderService.ReorderTree(tree);
-        await _flaggingService.UpdateHasContentFlag(tree, indexFiles);
-
-        return tree;
-    }
+    public async Task<NavTree> NavTree(CancellationToken cancellationToken) => await GetFilteredTree(cancellationToken);
 
     [HttpGet("{**location}")]
-    public async Task<IActionResult> ByLocation(string location)
+    public async Task<IActionResult> ByLocation([FromRoute] string location, CancellationToken cancellationToken)
     {
         location = location.EndsWith(".md") ? location[..^3] : location;
-        var doc = await _indexingService.GetIndexedFile(location);
+
+        var tree = await GetFilteredTree( cancellationToken);
+        var node = tree.FindNodeByLocation(location);
+        if (node == null)
+            return NotFound();
+
+        var doc = await _indexingService.GetIndexedFile(location, cancellationToken);
 
         return doc is not null ? Ok(doc) : NotFound();
     }

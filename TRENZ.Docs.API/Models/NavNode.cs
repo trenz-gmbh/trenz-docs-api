@@ -13,6 +13,16 @@ public class NavNode
     public const char Separator = '/';
 
     /// <summary>
+    /// The permission to read the content of a node.
+    /// </summary>
+    public const string PermissionRead = "read";
+
+    /// <summary>
+    /// The permission to list the children of a node.
+    /// </summary>
+    public const string PermissionList = "list";
+
+    /// <summary>
     /// Represents a node within a navigation tree. Can have children.
     /// </summary>
     /// <param name="location">The location of the node in the tree.</param>
@@ -66,6 +76,13 @@ public class NavNode
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, NavNode>? Children { get; set; }
+
+    /// <summary>
+    /// Contains a list of groups which can access this node. Child nodes have their own set of groups.
+    /// Is ignored during JSON serialization.
+    /// </summary>
+    [JsonIgnore]
+    public Dictionary<string, string[]> Groups { get; set; } = new();
 
     /// <summary>
     /// Converts a physical file path to a location in the tree.

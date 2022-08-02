@@ -60,8 +60,8 @@ public class TreeBuildingServiceTest
     [DynamicData(nameof(BuildTreeAsyncValuesProvider), DynamicDataSourceType.Method)]
     public async Task TestBuildTreeAsync(IEnumerable<IndexFile> indexFiles, Dictionary<string, NavNode> expectedTree)
     {
-        var service = new TreeBuildingService();
-        var tree = await service.BuildTreeAsync(indexFiles);
+        var service = new NavTreeProvider();
+        var tree = await service.RebuildAsync(indexFiles);
 
         Assert.IsTrue(
             tree.DeepSequenceEquals(

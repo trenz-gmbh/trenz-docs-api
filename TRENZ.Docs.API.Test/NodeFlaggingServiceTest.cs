@@ -49,9 +49,9 @@ public class NodeFlaggingServiceTest
     [DynamicData(nameof(UpdateHasContentFlagValuesProvider), DynamicDataSourceType.Method)]
     public async Task TestUpdateHasContentFlag(Dictionary<string, NavNode> tree, List<IndexFile> indexFiles, Dictionary<string, NavNode> expectedTree)
     {
-        var service = new NodeFlaggingService();
+        var service = new NavNodeFlaggingService();
 
-        await service.UpdateHasContentFlag(tree, indexFiles);
+        await service.UpdateHasContentFlagAsync(tree, indexFiles);
 
         Assert.IsTrue(
             tree.DeepSequenceEquals(

@@ -20,6 +20,8 @@ public class FileController : ControllerBase
     [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60 * 60 * 24 * 7)]
     public async Task<IActionResult> Get(string location)
     {
+        // FIXME: check authorization
+
         var normalizedLocation = Uri.UnescapeDataString(location).TrimStart(NavNode.Separator);
         var imageFile = _sourcesProvider
             .GetSources()

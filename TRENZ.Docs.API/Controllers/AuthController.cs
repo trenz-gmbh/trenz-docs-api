@@ -8,36 +8,40 @@ namespace TRENZ.Docs.API.Controllers;
 [Route("api/[controller]/[action]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthProvider _authProvider;
+    private readonly IAuthAdapter authAdapter;
 
-    public AuthController(IAuthProvider authProvider)
+    public AuthController(IAuthAdapter authAdapter)
     {
-        _authProvider = authProvider;
+        this.authAdapter = authAdapter;
     }
 
     [HttpGet]
     public async Task<IActionResult> Redirect()
     {
-        var returnUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
+        var returnUrl = Request.Headers.Referer.ToString();
+        var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
 
         // TODO: get branding information from configuration
-        var request = new AuthenticateRequest(returnUrl, "#3a6");
+        var request = new AuthenticateRequest(returnUrl, callbackUrl, "#3a6");
 
-        return await _authProvider.RedirectToLoginPage(request);
+        return await authAdapter.RedirectToLoginPageAsync(request);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Callback()
+    public async Task<IActionResult> Callback([FromQuery] string returnUrl)
     {
-        var result = await _authProvider.Process(HttpContext.Request);
-        if (result?.Success ?? false)
+        var result = await authAdapter.HandleCallbackAsync(HttpContext);
+        if (result)
         {
-            // TODO: set cookie
-            // MAYBE: set success message?
+            // TODO: set success message
+        }
+        else
+        {
+            // TODO: set error message
         }
 
         // TODO: redirect to front end
 
-        return Ok();
+        return Redirect(returnUrl);
     }
 }

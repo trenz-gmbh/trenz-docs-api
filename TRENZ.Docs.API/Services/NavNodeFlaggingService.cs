@@ -4,10 +4,10 @@ using TRENZ.Docs.API.Models.Index;
 
 namespace TRENZ.Docs.API.Services;
 
-public class NodeFlaggingService : INodeFlaggingService
+public class NavNodeFlaggingService : INavNodeFlaggingService
 {
     /// <inheritdoc />
-    public async Task UpdateHasContentFlag(Dictionary<string, NavNode> tree, List<IndexFile> indexFiles)
+    public async Task UpdateHasContentFlagAsync(Dictionary<string, NavNode> tree, List<IndexFile> indexFiles, CancellationToken cancellationToken = default)
     {
         foreach (var node in tree.Values)
         {
@@ -18,7 +18,7 @@ public class NodeFlaggingService : INodeFlaggingService
                 continue;
             }
 
-            await UpdateHasContentFlag(node.Children!, indexFiles);
+            await UpdateHasContentFlagAsync(node.Children!, indexFiles, cancellationToken);
 
             node.HasContent = indexFiles.Any(f => f.location == node.Location);
         }

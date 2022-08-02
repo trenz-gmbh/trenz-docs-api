@@ -11,13 +11,15 @@ public class MeilisearchIndexingService : IIndexingService
     private const string IndexName = "trenz-docs-index"; // MAYBE: make the name configurable via appsettings.json
 
     private readonly MeilisearchClient _client;
+    private readonly INavTreeProvider _navTreeProvider;
     private readonly ILogger<MeilisearchIndexingService> _logger;
 
     private DateTimeOffset _lastIndexingTime;
 
-    public MeilisearchIndexingService(MeilisearchClient client, ILogger<MeilisearchIndexingService> logger)
+    public MeilisearchIndexingService(MeilisearchClient client, INavTreeProvider navTreeProvider, ILogger<MeilisearchIndexingService> logger)
     {
         _client = client;
+        _navTreeProvider = navTreeProvider;
         _logger = logger;
     }
 
@@ -27,7 +29,7 @@ public class MeilisearchIndexingService : IIndexingService
     }
 
     /// <inheritdoc />
-    public async Task IndexAsync(IEnumerable<IndexFile> files, CancellationToken cancellationToken = default)
+    public async Task IndexAsync(List<IndexFile> files, CancellationToken cancellationToken = default)
     {
         var health = await _client.HealthAsync(cancellationToken);
         _logger.LogInformation("Meilisearch is {Status}", health.Status);
@@ -57,17 +59,8 @@ public class MeilisearchIndexingService : IIndexingService
         }
 
         _lastIndexingTime = DateTimeOffset.UtcNow;
-    }
 
-    /// <inheritdoc />
-    public async Task<IEnumerable<IndexFile>> GetIndexedFiles(CancellationToken cancellationToken = default)
-    {
-        var results = await GetIndex().GetDocumentsAsync<IndexFile>(new()
-        {
-            Limit = 10000,
-        }, cancellationToken);
-
-        return results.Results;
+        await _navTreeProvider.RebuildAsync(files, cancellationToken);
     }
 
     /// <inheritdoc />
