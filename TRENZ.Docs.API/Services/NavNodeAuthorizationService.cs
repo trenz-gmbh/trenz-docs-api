@@ -1,5 +1,5 @@
 ﻿using Tomlyn;
-using Tomlyn.Model;
+using Tomlyn.Syntax;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
 
@@ -54,13 +54,35 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
 
                 foreach (var item in table.Items)
                 {
-                    var group = item.Key!.ToString();
-                    var permissions = item.Value;
+                    // FIXME: there has to be a better way instead of... this.
+                    var group = (item.Key!.Key! as BareKeySyntax)!.Key!.Text!;
+                    var permissions = (item.Value as ArraySyntax)!.Items.Select(s => (s.Value as StringValueSyntax)!.Value!.Trim());
+
+                    await SetGroupsRecursivelyAsync(node, group, permissions.ToArray(), cancellationToken);
                 }
             }
         }
 
         // await UpdateChildrenGroupsAsync(new(), tree.Root, authzFiles, cancellationToken);
+    }
+
+    private async Task SetGroupsRecursivelyAsync(NavNode node, string group, string[] permissions, CancellationToken cancellationToken = default)
+    {
+        // FIXME: need a better way to negotiate which set of groups to use. For now, we'll just use the set with _less_ groups (the more restrictive one).
+        if (!node.Groups.ContainsKey(group) || node.Groups[group].Length > permissions.Length)
+        {
+            node.Groups[group] = permissions;
+        }
+
+        _logger.LogDebug($"Group {group} has permissions [{string.Join(", ", node.Groups[group])}] for node {node.Location}.");
+
+        if (node.Children == null)
+            return;
+
+        foreach (var child in node.Children)
+        {
+            await SetGroupsRecursivelyAsync(child.Value, group, permissions, cancellationToken);
+        }
     }
 
     // private async Task UpdateChildrenGroupsAsync(List<string> previousParts, Dictionary<string, NavNode> subtree, Dictionary<string[], ISourceFile> authzFiles, CancellationToken cancellationToken = default)

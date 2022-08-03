@@ -27,7 +27,10 @@ public class DocumentsController : ControllerBase
     {
         var claims = await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
 
-        return _navTreeProvider.Tree.WithoutHiddenNodes().FilterByGroups(claims ?? Array.Empty<string>());
+        return _navTreeProvider.Tree
+            .WithoutHiddenNodes()
+            .FilterByGroups(claims ?? Array.Empty<string>())
+            .WithoutChildlessContentlessNodes();
     }
 
     [HttpGet]

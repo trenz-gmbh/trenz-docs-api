@@ -27,12 +27,10 @@ public class NavNode
     /// </summary>
     /// <param name="location">The location of the node in the tree.</param>
     /// <param name="hasContent">Whether or not this node has a corresponding content file.</param>
-    /// <param name="children">A dictionary of child nodes, keyed by the child's node name.</param>
-    public NavNode(string location, bool hasContent = false, Dictionary<string, NavNode>? children = null)
+    public NavNode(string location, bool hasContent = false)
     {
         Location = location;
         HasContent = hasContent;
-        Children = children;
     }
 
     /// <summary>
@@ -78,7 +76,8 @@ public class NavNode
     public Dictionary<string, NavNode>? Children { get; set; }
 
     /// <summary>
-    /// Contains a list of groups which can access this node. Child nodes have their own set of groups.
+    /// Contains a dictionary keyed by the group name whose values is an array of permissions of this group for this
+    /// node. Child nodes have their own set of group permissions.
     /// Is ignored during JSON serialization.
     /// </summary>
     [JsonIgnore]

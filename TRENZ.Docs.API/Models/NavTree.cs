@@ -12,27 +12,63 @@ public class NavTree
 
     public Dictionary<string, NavNode> Root { get; set; }
 
-    public NavTree WithoutHiddenNodes() => new(FilterChildrenBy(Root, kvp => kvp.Value.Order >= 0));
+    public NavTree WithoutHiddenNodes() => new(FilterChildrenBy(Root, node => node.Order >= 0));
 
-    public NavTree FilterByGroups(IEnumerable<string> groups) => new(FilterChildrenBy(Root, kvp => !kvp.Value.Groups.Any() || kvp.Value.Groups.Keys.Intersect(groups).Any())); // TODO check if children listing is allowed
+    public NavTree WithoutChildlessContentlessNodes() => new(FilterChildrenBy(Root, node => node.Children != null || node.HasContent));
 
-    private static Dictionary<string, NavNode> FilterChildrenBy(Dictionary<string, NavNode> subtree,  Func<KeyValuePair<string, NavNode>, bool> predicate)
+    public NavTree FilterByGroups(IEnumerable<string> groups)
     {
-        return subtree
-            .Where(predicate)
-            .Select(kvp =>
-            {
-                if (kvp.Value.Children != null)
-                    return new(
-                        kvp.Key,
-                        new(
-                            kvp.Value.Location,
-                            kvp.Value.HasContent,
-                            FilterChildrenBy(kvp.Value.Children, predicate)
-                        )
-                    );
+        var groupsList = groups.ToList();
 
-                return kvp;
+        bool HasPermissionFor(NavNode node, string permission)
+        {
+            if (!node.Groups.Any())
+                return true;
+
+            return node.Groups.Keys
+                .Intersect(groupsList)
+                .Any(group => node.Groups[group].Contains(permission));
+        }
+
+        var newRoot = FilterChildrenBy(
+            Root,
+            node => HasPermissionFor(node, NavNode.PermissionRead),
+            node => HasPermissionFor(node, NavNode.PermissionList)
+        );
+
+        return new(newRoot);
+    }
+
+    private static Dictionary<string, NavNode> FilterChildrenBy(
+        Dictionary<string, NavNode> subtree,
+        Func<NavNode, bool> includeNode,
+        Func<NavNode, bool>? includeChildren = null
+    )
+    {
+        includeChildren ??= _ => true;
+
+        return subtree
+            .Where(kvp => includeNode(kvp.Value))
+            .Select(tup =>
+            {
+                if (tup.Value.Children == null)
+                    return tup;
+
+                Dictionary<string, NavNode>? children = null;
+                if (includeChildren(tup.Value))
+                    children = FilterChildrenBy(tup.Value.Children, includeNode, includeChildren);
+
+                return new(
+                    tup.Key,
+                    new(
+                        tup.Value.Location,
+                        tup.Value.HasContent
+                    )
+                    {
+                        Children = children is { Count: > 0 } ? children : null,
+                        Groups = tup.Value.Groups,
+                    }
+                );
             })
             .ToDictionary(
                 kvp => kvp.Key,
