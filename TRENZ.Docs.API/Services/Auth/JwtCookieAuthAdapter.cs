@@ -18,7 +18,8 @@ public class JwtCookieAuthAdapter : IAuthAdapter
     private readonly IConfiguration _configuration;
 
     private string Endpoint => _configuration["Auth:Endpoint"];
-    private string Secret => _configuration["Auth:Secret"];
+    private string ClientId => _configuration["Auth:ClientId"];
+    private string ClientSecret => _configuration["Auth:ClientSecret"];
 
     public JwtCookieAuthAdapter(IConfiguration configuration)
     {
@@ -28,7 +29,18 @@ public class JwtCookieAuthAdapter : IAuthAdapter
     /// <inheritdoc />
     public Task<IActionResult> RedirectToLoginPageAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
     {
-        var endpoint = GetSignedEndpoint(request);
+        var endpoint = SignEndpoint(
+            Endpoint,
+            new Dictionary<string, string>
+            {
+                { "returnUrl", request.ReturnUrl },
+                { "callbackUrl", request.CallbackUrl },
+                { "brandingColor", request.BrandingColor },
+                { "brandingImageUrl", request.BrandingImageUrl },
+                { "clientId", ClientId },
+            },
+            ClientSecret
+        );
 
         return Task.FromResult<IActionResult>(new RedirectResult(endpoint, false, false));
     }
@@ -36,11 +48,16 @@ public class JwtCookieAuthAdapter : IAuthAdapter
     /// <inheritdoc />
     public Task<bool> HandleCallbackAsync(HttpContext context, CancellationToken cancellationToken = default)
     {
+        var query = context.Request.QueryString.Value;
+        if (query == null)
+            return Task.FromResult(false);
+
+        if (!ValidateSignature(query, ClientSecret))
+            return Task.FromResult(false);
+
         var success = bool.Parse(context.Request.Query["success"].ToString());
         if (!success)
-        {
             return Task.FromResult(false);
-        }
 
         var token = context.Request.Query["token"].ToString();
 
@@ -48,8 +65,9 @@ public class JwtCookieAuthAdapter : IAuthAdapter
         var cookieOptsBuilder = new CookieBuilder
         {
             HttpOnly = true,
-            SecurePolicy = CookieSecurePolicy.None,
-            SameSite = SameSiteMode.Lax,
+            SecurePolicy = CookieSecurePolicy.Always,
+            SameSite = SameSiteMode.None,
+            Path = "/api",
             Expiration = TimeSpan.FromDays(30),
         };
         var cookieOpts = cookieOptsBuilder.Build(context);
@@ -75,18 +93,22 @@ public class JwtCookieAuthAdapter : IAuthAdapter
         return Task.FromResult<IEnumerable<string>?>(claims);
     }
 
-    private string GetSignedEndpoint(AuthenticateRequest request)
+    private static string SignEndpoint(
+        string endpoint,
+        IDictionary<string, string> queryParams,
+        string secret
+    )
     {
-        var uri = new UriBuilder(Endpoint);
+        var uri = new UriBuilder(endpoint);
 
         var query = HttpUtility.ParseQueryString(uri.Query);
-        query["returnUrl"] = request.ReturnUrl;
-        query["callbackUrl"] = request.CallbackUrl;
-        query["brandingColor"] = request.BrandingColor;
-        query["brandingImageUrl"] = request.BrandingImageUrl;
+        foreach (var (key, value) in queryParams)
+        {
+            query[key] = value;
+        }
 
         var payload = query.ToString()!;
-        var signature = GenerateSignature(payload);
+        var signature = GenerateSignature(secret, payload);
         query["signature"] = signature;
 
         uri.Query = query.ToString();
@@ -94,9 +116,27 @@ public class JwtCookieAuthAdapter : IAuthAdapter
         return uri.ToString();
     }
 
-    private string GenerateSignature(string payload)
+    private static bool ValidateSignature(
+        string query,
+        string secret
+    )
     {
-        var key = Encoding.UTF8.GetBytes(Secret);
+        var collection = HttpUtility.ParseQueryString(query);
+        if (collection["signature"] == null)
+            return false;
+
+        var signature = collection["signature"];
+        collection.Remove("signature");
+
+        var payload = collection.ToString()!;
+        var expectedSignature = GenerateSignature(secret, payload);
+
+        return signature == expectedSignature;
+    }
+
+    private static string GenerateSignature(string secret, string payload)
+    {
+        var key = Encoding.UTF8.GetBytes(secret);
         using var hash = new HMACSHA256(key);
         var signature = hash.ComputeHash(Encoding.UTF8.GetBytes(payload));
         return Convert.ToBase64String(signature);
