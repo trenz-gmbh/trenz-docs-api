@@ -14,7 +14,7 @@ public class NavTree
 
     public NavTree WithoutHiddenNodes() => new(FilterChildrenBy(Root, kvp => kvp.Value.Order >= 0));
 
-    public NavTree FilterByGroups(IEnumerable<string> groups) => new(FilterChildrenBy(Root, kvp => !kvp.Value.Groups.Any() || kvp.Value.Groups.Intersect(groups).Any()));
+    public NavTree FilterByGroups(IEnumerable<string> groups) => new(FilterChildrenBy(Root, kvp => !kvp.Value.Groups.Any() || kvp.Value.Groups.Keys.Intersect(groups).Any())); // TODO check if children listing is allowed
 
     private static Dictionary<string, NavNode> FilterChildrenBy(Dictionary<string, NavNode> subtree,  Func<KeyValuePair<string, NavNode>, bool> predicate)
     {
