@@ -1,3 +1,3 @@
 ﻿namespace TRENZ.Docs.API.Models.Auth;
 
-public record AuthenticateRequest(string ReturnUrl, string CallbackUrl, string BrandingName, string BrandingColor, string BrandingImageUrl = "");
+public record AuthenticateRequest(string ReturnUrl, string CallbackUrl, string BrandingColor = "", string BrandingImageUrl = "");
