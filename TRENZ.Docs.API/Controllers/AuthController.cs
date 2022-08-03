@@ -16,13 +16,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Redirect()
+    public async Task<IActionResult> Transfer([FromQuery] string? returnUrl)
     {
-        var returnUrl = Request.Headers.Referer.ToString();
+        returnUrl ??= Request.Headers.Referer.ToString();
         var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
 
         // TODO: get branding information from configuration
-        var request = new AuthenticateRequest(returnUrl, callbackUrl, "#3a6");
+        var request = new AuthenticateRequest(returnUrl, callbackUrl, "TRENZ Docs", "#3a6");
 
         return await authAdapter.RedirectToLoginPageAsync(request);
     }
