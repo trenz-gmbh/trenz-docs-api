@@ -27,7 +27,8 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
             .ToDictionary(
                 sf => sf.RelativePath.Split(Path.DirectorySeparatorChar)[..^1],
                 sf => sf
-            );
+            )
+            .OrderBy(kvp => kvp.Key.Length);
 
         foreach (var (path, authzFile) in authzFiles)
         {
@@ -40,6 +41,8 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
 
                 continue;
             }
+
+            _logger.LogDebug($"Processing authz file at '{authzFile.RelativePath}'.");
 
             foreach (var table in parsed.Tables)
             {
@@ -62,19 +65,28 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
                 }
             }
         }
-
-        // await UpdateChildrenGroupsAsync(new(), tree.Root, authzFiles, cancellationToken);
     }
 
     private async Task SetGroupsRecursivelyAsync(NavNode node, string group, string[] permissions, CancellationToken cancellationToken = default)
     {
-        // FIXME: need a better way to negotiate which set of groups to use. For now, we'll just use the set with _less_ groups (the more restrictive one).
-        if (!node.Groups.ContainsKey(group) || node.Groups[group].Length > permissions.Length)
+        // FIXME: need a better way to negotiate which set of permissions to use. For now, we'll just use the set with _less_ permissions (the more restrictive one).
+        if (!node.Groups.ContainsKey(group))
         {
             node.Groups[group] = permissions;
-        }
 
-        _logger.LogDebug($"Group {group} has permissions [{string.Join(", ", node.Groups[group])}] for node {node.Location}.");
+            _logger.LogDebug($"Group {group} has permissions [{string.Join(", ", permissions)}] for node {node.Location}.");
+        }
+        else if (node.Groups[group].Length > permissions.Length)
+        {
+            var previous = node.Groups[group];
+            node.Groups[group] = permissions;
+
+            _logger.LogDebug($"Updated permissions for group {group} to [{string.Join(",", permissions)}] for node {node.Location} (was [{string.Join(",", previous)}]).");
+        }
+        else
+        {
+            _logger.LogDebug($"Skipping updating permissions for group {group} for node {node.Location} because the current permissions are already more restrictive ({string.Join(",", node.Groups[group])} <=> {string.Join(",", permissions)}).");
+        }
 
         if (node.Children == null)
             return;
@@ -84,19 +96,4 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
             await SetGroupsRecursivelyAsync(child.Value, group, permissions, cancellationToken);
         }
     }
-
-    // private async Task UpdateChildrenGroupsAsync(List<string> previousParts, Dictionary<string, NavNode> subtree, Dictionary<string[], ISourceFile> authzFiles, CancellationToken cancellationToken = default)
-    // {
-    //     foreach (var (key, node) in subtree)
-    //     {
-    //         var pathParts = previousParts.Append(key).ToList();
-    //
-    //         _logger.LogInformation("Visited node {Path}", string.Join('/', pathParts));
-    //
-    //         if (node.Children != null)
-    //         {
-    //             await UpdateChildrenGroupsAsync(pathParts, node.Children, authzFiles, cancellationToken);
-    //         }
-    //     }
-    // }
 }
