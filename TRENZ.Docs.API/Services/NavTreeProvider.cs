@@ -44,7 +44,7 @@ public class NavTreeProvider : INavTreeProvider
             }
         }
 
-        Tree.Root = root;
+        Tree = new(root);
 
         await PostProcessTree(indexFiles, cancellationToken);
 
@@ -59,5 +59,5 @@ public class NavTreeProvider : INavTreeProvider
     }
 
     /// <inheritdoc />
-    public NavTree Tree { get; } = new(new());
+    public NavTree Tree { get; private set; } = new(new());
 }

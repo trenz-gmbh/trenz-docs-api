@@ -74,9 +74,9 @@ public class NavTreeProviderTest
         var nodeFlaggerMock = new Mock<INavNodeFlaggingService>();
         nodeFlaggerMock.Setup(flagger => flagger.UpdateHasContentFlagAsync(new(), indexFiles, default)).Returns(Task.CompletedTask);
         var nodeOrderingMock = new Mock<INavNodeOrderingService>();
-        nodeOrderingMock.Setup(orderer => orderer.ReorderTreeAsync(new(new()), default)).Returns(Task.CompletedTask);
+        nodeOrderingMock.Setup(orderer => orderer.ReorderTreeAsync(new(new(), false), default)).Returns(Task.CompletedTask);
         var nodeAuthorizationMock = new Mock<INavNodeAuthorizationService>();
-        nodeAuthorizationMock.Setup(authorizer => authorizer.UpdateGroupsAsync(new(new()), default)).Returns(Task.CompletedTask);
+        nodeAuthorizationMock.Setup(authorizer => authorizer.UpdateGroupsAsync(new(new(), false), default)).Returns(Task.CompletedTask);
 
         var service = new NavTreeProvider(nodeFlaggerMock.Object, nodeOrderingMock.Object, nodeAuthorizationMock.Object);
         var tree = await service.RebuildAsync(indexFiles);

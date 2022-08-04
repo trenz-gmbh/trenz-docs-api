@@ -57,6 +57,11 @@ public class NavNode
     public bool HasContent { get; set; }
 
     /// <summary>
+    /// Whether or not this node contains children which were filtered out due to permissions.
+    /// </summary>
+    public bool HasHiddenChildren { get; set; }
+
+    /// <summary>
     /// The display name of the node in the tree. This is the last part of <see cref="Location" />.
     /// </summary>
     public string NodeName => LocationParts.Last();
