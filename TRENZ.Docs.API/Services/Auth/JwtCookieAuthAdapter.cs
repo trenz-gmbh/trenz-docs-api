@@ -27,11 +27,11 @@ public class JwtCookieAuthAdapter : IAuthAdapter
     }
 
     /// <inheritdoc />
-    public Task<IActionResult> RedirectToLoginPageAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
+    public Task<IActionResult> RedirectToSignInPageAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
     {
         var endpoint = SignEndpoint(
             Endpoint,
-            new Dictionary<string, string>
+            new Dictionary<string, string?>
             {
                 { "returnUrl", request.ReturnUrl },
                 { "callbackUrl", request.CallbackUrl },
@@ -77,6 +77,18 @@ public class JwtCookieAuthAdapter : IAuthAdapter
     }
 
     /// <inheritdoc />
+    public Task SignOutAsync(HttpContext context, CancellationToken cancellationToken = default)
+    {
+        if (context.Request.Cookies[CookieName] != null)
+            context.Response.Cookies.Delete(CookieName, new()
+            {
+                Expires = DateTimeOffset.MinValue,
+            });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public Task<IEnumerable<string>?> GetClaimsAsync(HttpContext context, CancellationToken cancellationToken = default)
     {
         if (!context.Request.Cookies.TryGetValue(CookieName, out var jwt))
@@ -95,7 +107,7 @@ public class JwtCookieAuthAdapter : IAuthAdapter
 
     private static string SignEndpoint(
         string endpoint,
-        IDictionary<string, string> queryParams,
+        IDictionary<string, string?> queryParams,
         string secret
     )
     {

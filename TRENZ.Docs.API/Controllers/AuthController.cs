@@ -18,25 +18,41 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Transfer([FromQuery] string? returnUrl)
+    public async Task<IActionResult> Transfer([FromQuery] string? returnUrl, CancellationToken cancellationToken = default)
     {
         returnUrl ??= Request.Headers.Referer.ToString();
         var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
 
         var request = new AuthenticateRequest(returnUrl, callbackUrl, configuration["Branding:Color"], configuration["Branding:Image"]);
 
-        return await authAdapter.RedirectToLoginPageAsync(request);
+        return await authAdapter.RedirectToSignInPageAsync(request, cancellationToken);
     }
 
     [HttpGet]
-    public async Task<IActionResult> Callback([FromQuery] string returnUrl)
+    public async Task<IActionResult> Callback([FromQuery] string returnUrl, CancellationToken cancellationToken = default)
     {
-        var success = await authAdapter.HandleCallbackAsync(HttpContext);
+        var success = await authAdapter.HandleCallbackAsync(HttpContext, cancellationToken);
         if (!success)
         {
             // TODO: set error message
         }
 
         return Redirect(returnUrl);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SignOut([FromQuery] string returnUrl, CancellationToken cancellationToken = default)
+    {
+        await authAdapter.SignOutAsync(HttpContext, cancellationToken);
+
+        return Redirect(returnUrl);
+    }
+
+    [HttpGet]
+    public async Task<bool> State(CancellationToken cancellationToken = default)
+    {
+        var claims = await authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
+
+        return claims != null;
     }
 }
