@@ -1,5 +1,4 @@
 ﻿using TRENZ.Docs.API.Models;
-using TRENZ.Docs.API.Models.Sources;
 using TRENZ.Docs.API.Services;
 using TRENZ.Docs.API.Test.Models.Sources;
 
@@ -7,7 +6,7 @@ namespace TRENZ.Docs.API.Test;
 
 [TestClass]
 [TestCategory("Services")]
-public class TreeOrderServiceTest
+public class NavNodeOrderingServiceTest
 {
     [TestMethod]
     public async Task TestReorderSimpleTree()
@@ -22,19 +21,19 @@ public class TreeOrderServiceTest
         var logger = TestHelper.GetLogger<NavNodeOrderingService>();
         var service = new NavNodeOrderingService(sources, logger);
 
-        var tree = new Dictionary<string, NavNode>
+        var tree = new NavTree(new()
         {
             { "End", new("End") },
             { "Start", new("Start") },
             { "Middle", new("Middle") },
             { "Hidden", new("Hidden") },
-        };
+        });
 
-        Assert.IsTrue(tree.All(kvp => kvp.Value.Order == 0));
+        Assert.IsTrue(tree.Root.All(kvp => kvp.Value.Order == 0));
         
-        await service.ReorderTree(tree);
+        await service.ReorderTreeAsync(tree);
 
-        Assert.IsTrue(tree.Zip(new[] { 0, 3, 2, 1 }).All(tuple => tuple.First.Value.Order == tuple.Second));
+        Assert.IsTrue(tree.Root.Zip(new[] { 0, 3, 2, 1 }).All(tuple => tuple.First.Value.Order == tuple.Second));
     }
     [TestMethod]
     public async Task TestReorderSimpleTreeWithOrderFile()
@@ -50,18 +49,18 @@ public class TreeOrderServiceTest
         var logger = TestHelper.GetLogger<NavNodeOrderingService>();
         var service = new NavNodeOrderingService(sources, logger);
 
-        var tree = new Dictionary<string, NavNode>
+        var tree = new NavTree(new()
         {
             { "End", new("End") },
             { "Start", new("Start") },
             { "Middle", new("Middle") },
             { "Hidden", new("Hidden") },
-        };
+        });
 
-        Assert.IsTrue(tree.All(kvp => kvp.Value.Order == 0));
+        Assert.IsTrue(tree.Root.All(kvp => kvp.Value.Order == 0));
         
-        await service.ReorderTree(tree);
+        await service.ReorderTreeAsync(tree);
         
-        Assert.IsTrue(tree.Zip(new[] { 2, 0, 1, -1 }).All(tuple => tuple.First.Value.Order == tuple.Second));
+        Assert.IsTrue(tree.Root.Zip(new[] { 2, 0, 1, -1 }).All(tuple => tuple.First.Value.Order == tuple.Second));
     }
 }

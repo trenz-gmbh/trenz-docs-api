@@ -6,7 +6,7 @@ namespace TRENZ.Docs.API.Test;
 
 [TestClass]
 [TestCategory("Services")]
-public class NodeFlaggingServiceTest
+public class NavNodeFlaggingServiceTest
 {
     public static IEnumerable<object[]> UpdateHasContentFlagValuesProvider()
     {
@@ -22,10 +22,13 @@ public class NodeFlaggingServiceTest
             new Dictionary<string, NavNode>
             {
                 {
-                    "root", new("root", false, new()
+                    "root", new("root")
                     {
-                        { "nested", new("root/nested") },
-                    })
+                        Children = new()
+                        {
+                            { "nested", new("root/nested") },
+                        },
+                    }
                 },
             },
             new List<IndexFile>
@@ -36,10 +39,13 @@ public class NodeFlaggingServiceTest
             new Dictionary<string, NavNode>
             {
                 {
-                    "root", new("root", true, new()
+                    "root", new("root", true)
                     {
-                        { "nested", new("root/nested", true) },
-                    })
+                        Children = new()
+                        {
+                            { "nested", new("root/nested", true) },
+                        },
+                    }
                 },
             },
         };
