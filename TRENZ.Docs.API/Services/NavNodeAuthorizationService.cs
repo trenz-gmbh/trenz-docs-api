@@ -32,9 +32,10 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
 
         foreach (var (path, authzFile) in authzFiles)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var text = await authzFile.GetTextAsync(cancellationToken);
             var parsed = Toml.Parse(text, options: TomlParserOptions.ParseAndValidate);
-
             if (parsed.HasErrors)
             {
                 _logger.LogError($"Authz at '{authzFile.RelativePath}' contains syntax errors and is therefore ignored.");
@@ -42,33 +43,42 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
                 continue;
             }
 
-            _logger.LogDebug($"Processing authz file at '{authzFile.RelativePath}'.");
+            await ProcessTables(tree, path, parsed, cancellationToken);
+        }
+    }
 
-            foreach (var table in parsed.Tables)
+    private async Task ProcessTables(NavTree tree, string[] path, DocumentSyntax document, CancellationToken cancellationToken = default)
+    {
+        _logger.LogDebug($"Processing authz document at '{string.Join("/", path)}/.authz'.");
+
+        foreach (var table in document.Tables)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var nodePath = path.Append(table.Name!.ToString()).ToArray();
+            var node = tree.FindNodeByLocationParts(nodePath);
+            if (node == null)
             {
-                var nodePath = path.Append(table.Name!.ToString()).ToArray();
-                var node = tree.FindNodeByLocationParts(nodePath);
-                if (node == null)
-                {
-                    _logger.LogWarning($"Authz at '{authzFile.RelativePath}' contains a table for a node at '{string.Join("/", nodePath)}' which does not exist.");
+                _logger.LogWarning($"Authz at '{string.Join("/", path)}/.authz' contains a table for a node at '{string.Join("/", nodePath)}' which does not exist.");
 
-                    continue;
-                }
+                continue;
+            }
 
-                foreach (var item in table.Items)
-                {
-                    // FIXME: there has to be a better way instead of... this.
-                    var group = (item.Key!.Key! as BareKeySyntax)!.Key!.Text!;
-                    var permissions = (item.Value as ArraySyntax)!.Items.Select(s => (s.Value as StringValueSyntax)!.Value!.Trim());
+            foreach (var item in table.Items)
+            {
+                // FIXME: there has to be a better way instead of... this.
+                var group = (item.Key!.Key! as BareKeySyntax)!.Key!.Text!;
+                var permissions = (item.Value as ArraySyntax)!.Items.Select(s => (s.Value as StringValueSyntax)!.Value!.Trim());
 
-                    await SetGroupsRecursivelyAsync(node, group, permissions.ToArray(), cancellationToken);
-                }
+                await SetGroupsRecursivelyAsync(node, group, permissions.ToArray(), cancellationToken);
             }
         }
     }
 
     private async Task SetGroupsRecursivelyAsync(NavNode node, string group, string[] permissions, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         // FIXME: need a better way to negotiate which set of permissions to use. For now, we'll just use the set with _less_ permissions (the more restrictive one).
         if (!node.Groups.ContainsKey(group))
         {

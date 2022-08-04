@@ -41,7 +41,7 @@ public class DocumentsController : ControllerBase
     {
         location = location.EndsWith(".md") ? location[..^3] : location;
 
-        var tree = await GetFilteredTree( cancellationToken);
+        var tree = await GetFilteredTree(cancellationToken);
         var node = tree.FindNodeByLocation(location);
         if (node == null)
             return NotFound();
