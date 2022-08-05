@@ -24,7 +24,10 @@ builder.Services.AddSingleton<INavNodeOrderingService, NavNodeOrderingService>()
 builder.Services.AddSingleton<INavNodeFlaggingService, NavNodeFlaggingService>();
 builder.Services.AddSingleton<INavNodeAuthorizationService, NavNodeAuthorizationService>();
 
-builder.Services.AddAuthAdapter();
+if (builder.Configuration["Auth"] != null)
+{
+    builder.Services.AddAuthAdapter();
+}
 
 builder.Services.AddHostedService<Worker>();
 

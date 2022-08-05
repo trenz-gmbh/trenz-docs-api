@@ -8,30 +8,36 @@ namespace TRENZ.Docs.API.Controllers;
 [Route("api/[controller]/[action]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthAdapter authAdapter;
-    private readonly IConfiguration configuration;
+    private readonly IAuthAdapter? _authAdapter;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthAdapter authAdapter, IConfiguration configuration)
+    public AuthController(IConfiguration configuration, IAuthAdapter? authAdapter = null)
     {
-        this.authAdapter = authAdapter;
-        this.configuration = configuration;
+        _authAdapter = authAdapter;
+        _configuration = configuration;
     }
 
     [HttpGet]
     public async Task<IActionResult> Transfer([FromQuery] string? returnUrl, CancellationToken cancellationToken = default)
     {
         returnUrl ??= Request.Headers.Referer.ToString();
+        if (_authAdapter == null)
+            return Redirect(returnUrl); // MAYBE: append message telling user login is not available?
+
         var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
 
-        var request = new AuthenticateRequest(returnUrl, callbackUrl, configuration["Branding:Color"], configuration["Branding:Image"]);
+        var request = new AuthenticateRequest(returnUrl, callbackUrl, _configuration["Branding:Color"], _configuration["Branding:Image"]);
 
-        return await authAdapter.RedirectToSignInPageAsync(request, cancellationToken);
+        return await _authAdapter.RedirectToSignInPageAsync(request, cancellationToken);
     }
 
     [HttpGet]
     public async Task<IActionResult> Callback([FromQuery] string returnUrl, CancellationToken cancellationToken = default)
     {
-        var success = await authAdapter.HandleCallbackAsync(HttpContext, cancellationToken);
+        if (_authAdapter == null)
+            return Redirect(returnUrl); // MAYBE: append message telling user login is not available?
+
+        var success = await _authAdapter.HandleCallbackAsync(HttpContext, cancellationToken);
         if (!success)
         {
             // TODO: set error message
@@ -43,7 +49,8 @@ public class AuthController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> SignOut([FromQuery] string returnUrl, CancellationToken cancellationToken = default)
     {
-        await authAdapter.SignOutAsync(HttpContext, cancellationToken);
+        if (_authAdapter != null)
+            await _authAdapter.SignOutAsync(HttpContext, cancellationToken);
 
         return Redirect(returnUrl);
     }
@@ -51,7 +58,10 @@ public class AuthController : ControllerBase
     [HttpGet]
     public async Task<bool> State(CancellationToken cancellationToken = default)
     {
-        var claims = await authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
+        if (_authAdapter == null)
+            return false;
+
+        var claims = await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
 
         return claims != null;
     }

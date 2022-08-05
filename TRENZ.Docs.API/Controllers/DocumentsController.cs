@@ -10,12 +10,12 @@ public class DocumentsController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
     private readonly INavTreeProvider _navTreeProvider;
-    private readonly IAuthAdapter _authAdapter;
+    private readonly IAuthAdapter? _authAdapter;
 
     public DocumentsController(
         IIndexingService indexingService,
         INavTreeProvider navTreeProvider,
-        IAuthAdapter authAdapter
+        IAuthAdapter? authAdapter = null
     )
     {
         _indexingService = indexingService;
@@ -25,11 +25,13 @@ public class DocumentsController : ControllerBase
 
     private async Task<NavTree> GetFilteredTree(CancellationToken cancellationToken)
     {
-        var claims = await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
+        IEnumerable<string> claims = Array.Empty<string>();
+        if (_authAdapter != null)
+            claims = await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken) ?? Array.Empty<string>();
 
         return _navTreeProvider.Tree
             .WithoutHiddenNodes()
-            .FilterByGroups(claims ?? Array.Empty<string>())
+            .FilterByGroups(claims)
             .WithoutChildlessContentlessNodes();
     }
 
