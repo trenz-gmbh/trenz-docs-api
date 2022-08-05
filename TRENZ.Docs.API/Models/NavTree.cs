@@ -72,17 +72,13 @@ public class NavTree
                 if (includeChildren(tup.Value))
                     children = FilterChildrenBy(tup.Value.Children, includeNode, includeChildren, () => childExcluded = true);
 
+                var newNode = tup.Value.Clone();
+                newNode.Children = children is { Count: > 0 } ? children : null;
+                newNode.HasHiddenChildren = childExcluded;
+
                 return new(
                     tup.Key,
-                    new(
-                        tup.Value.Location,
-                        tup.Value.HasContent
-                    )
-                    {
-                        Children = children is { Count: > 0 } ? children : null,
-                        HasHiddenChildren = childExcluded,
-                        Groups = tup.Value.Groups,
-                    }
+                    newNode
                 );
             })
             .ToDictionary(

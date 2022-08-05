@@ -26,11 +26,9 @@ public class NavNode
     /// Represents a node within a navigation tree. Can have children.
     /// </summary>
     /// <param name="location">The location of the node in the tree.</param>
-    /// <param name="hasContent">Whether or not this node has a corresponding content file.</param>
-    public NavNode(string location, bool hasContent = false)
+    public NavNode(string location)
     {
         Location = location;
-        HasContent = hasContent;
     }
 
     /// <summary>
@@ -87,6 +85,23 @@ public class NavNode
     /// </summary>
     [JsonIgnore]
     public Dictionary<string, string[]> Groups { get; set; } = new();
+
+    /// <summary>
+    /// Creates a new instance of a <see cref="NavNode" /> with the same properties as this one.
+    /// Also clones all child nodes recursively.
+    /// </summary>
+    /// <returns>A new nav node without any references to this node.</returns>
+    public NavNode Clone()
+    {
+        return new(Location)
+        {
+            Groups = Groups,
+            Order = Order,
+            HasContent = HasContent,
+            HasHiddenChildren = HasHiddenChildren,
+            Children = Children?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone())
+        };
+    }
 
     /// <summary>
     /// Converts a physical file path to a location in the tree.
