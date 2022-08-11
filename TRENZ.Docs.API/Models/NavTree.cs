@@ -77,7 +77,10 @@ public class NavTree
 
                 var hasContent = tup.Value.HasContent;
                 if (includeContent(tup.Value))
+                {
                     hasContent = false;
+                    onNodeExcluded?.Invoke();
+                }
 
                 var newNode = tup.Value.Clone();
                 newNode.Children = children is { Count: > 0 } ? children : null;
