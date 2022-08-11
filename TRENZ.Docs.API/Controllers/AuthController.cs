@@ -18,11 +18,11 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
-    private Task<IActionResult> LoginNotAvailableRespose(string returnUrl)
+    private Task<IActionResult> AppendErrorCode(string returnUrl, string code)
     {
         var uri = new UriBuilder(returnUrl);
         var query = HttpUtility.ParseQueryString(uri.Query);
-        query["error"] = "login_not_available";
+        query["error"] = code;
         uri.Query = query.ToString();
         return Task.FromResult<IActionResult>(Redirect(uri.ToString()));
     }
@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
     {
         returnUrl ??= Request.Headers.Referer.ToString();
         if (_authAdapter == null)
-            return await LoginNotAvailableRespose(returnUrl); // MAYBE: append message telling user login is not available?
+            return await AppendErrorCode(returnUrl, "login_not_available");
 
         var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
 
@@ -45,13 +45,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Callback([FromQuery] string returnUrl, CancellationToken cancellationToken = default)
     {
         if (_authAdapter == null)
-            return await LoginNotAvailableRespose(returnUrl); // MAYBE: append message telling user login is not available?
+            return await AppendErrorCode(returnUrl, "login_not_available");
 
         var success = await _authAdapter.HandleCallbackAsync(HttpContext, cancellationToken);
         if (!success)
-        {
-            // TODO: set error message
-        }
+            return await AppendErrorCode(returnUrl, "invalid_callback");
 
         return Redirect(returnUrl);
     }
@@ -74,5 +72,11 @@ public class AuthController : ControllerBase
         var claims = await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
 
         return claims != null;
+    }
+
+    [HttpGet]
+    public async Task<IEnumerable<string>?> Claims(CancellationToken cancellationToken = default)
+    {
+        return _authAdapter is null ? null : await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
     }
 }
