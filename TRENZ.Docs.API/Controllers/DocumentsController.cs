@@ -45,11 +45,11 @@ public class DocumentsController : ControllerBase
 
         var tree = await GetFilteredTree(cancellationToken);
         var node = tree.FindNodeByLocation(location);
-        if (node == null)
+        if (node is not { HasContent: true })
             return NotFound();
 
         var doc = await _indexingService.GetIndexedFile(location, cancellationToken);
 
-        return doc is not null ? Ok(doc) : NotFound();
+        return doc is null ? NotFound() : Ok(doc);
     }
 }
