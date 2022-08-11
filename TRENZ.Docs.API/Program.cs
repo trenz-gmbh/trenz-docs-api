@@ -24,7 +24,7 @@ builder.Services.AddSingleton<INavNodeOrderingService, NavNodeOrderingService>()
 builder.Services.AddSingleton<INavNodeFlaggingService, NavNodeFlaggingService>();
 builder.Services.AddSingleton<INavNodeAuthorizationService, NavNodeAuthorizationService>();
 
-if (builder.Configuration["Auth"] != null)
+if (builder.Configuration.GetSection("Auth") != null)
 {
     builder.Services.AddAuthAdapter();
 }
