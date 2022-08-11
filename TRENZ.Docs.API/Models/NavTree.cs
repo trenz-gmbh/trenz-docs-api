@@ -23,19 +23,20 @@ public class NavTree
     {
         var groupsList = groups.ToList();
 
-        bool HasPermissionFor(NavNode node, string permission)
+        bool HasPermissionFor(NavNode node, params string[] permissions)
         {
             if (!node.Groups.Any())
                 return true;
 
             return node.Groups.Keys
                 .Intersect(groupsList)
-                .Any(group => node.Groups[group].Contains(permission));
+                .Any(group => node.Groups[group].Intersect(permissions).Any());
         }
 
         var childExcluded = false;
         var newRoot = FilterChildrenBy(
             Root,
+            node => HasPermissionFor(node, NavNode.PermissionList, NavNode.PermissionRead),
             node => HasPermissionFor(node, NavNode.PermissionRead),
             node => HasPermissionFor(node, NavNode.PermissionList),
             () => childExcluded = true
@@ -47,10 +48,12 @@ public class NavTree
     private static Dictionary<string, NavNode> FilterChildrenBy(
         Dictionary<string, NavNode> subtree,
         Func<NavNode, bool> includeNode,
+        Func<NavNode, bool>? includeContent = null,
         Func<NavNode, bool>? includeChildren = null,
         Action? onNodeExcluded = null
     )
     {
+        includeContent ??= _ => true;
         includeChildren ??= _ => true;
 
         return subtree
@@ -70,10 +73,15 @@ public class NavTree
                 Dictionary<string, NavNode>? children = null;
                 var childExcluded = false;
                 if (includeChildren(tup.Value))
-                    children = FilterChildrenBy(tup.Value.Children, includeNode, includeChildren, () => childExcluded = true);
+                    children = FilterChildrenBy(tup.Value.Children, includeNode, includeContent, includeChildren, () => childExcluded = true);
+
+                var hasContent = tup.Value.HasContent;
+                if (includeContent(tup.Value))
+                    hasContent = false;
 
                 var newNode = tup.Value.Clone();
                 newNode.Children = children is { Count: > 0 } ? children : null;
+                newNode.HasContent = hasContent;
                 newNode.HasHiddenChildren = childExcluded;
 
                 return new(
