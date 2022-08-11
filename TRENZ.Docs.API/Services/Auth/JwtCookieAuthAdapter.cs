@@ -13,7 +13,7 @@ namespace TRENZ.Docs.API.Services.Auth;
 public class JwtCookieAuthAdapter : IAuthAdapter
 {
     private const string CookieName = nameof(JwtCookieAuthAdapter) + "Token";
-    private const string ClaimsType = JwtRegisteredClaimNames.Sid;
+    private const string ClaimsType = "groups";
 
     private readonly IConfiguration _configuration;
 
