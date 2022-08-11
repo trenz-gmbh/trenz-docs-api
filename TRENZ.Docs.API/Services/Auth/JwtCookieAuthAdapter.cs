@@ -61,8 +61,16 @@ public class JwtCookieAuthAdapter : IAuthAdapter
 
         var token = context.Request.Query["token"].ToString();
 
+        var options = ConfigureCookie().Build(context);
+        context.Response.Cookies.Append(CookieName, token, options);
+
+        return Task.FromResult(true);
+    }
+
+    private CookieBuilder ConfigureCookie()
+    {
         // MAYBE: get some cookie options from configuration
-        var cookieOptsBuilder = new CookieBuilder
+        return new()
         {
             HttpOnly = true,
             SecurePolicy = CookieSecurePolicy.Always,
@@ -70,20 +78,18 @@ public class JwtCookieAuthAdapter : IAuthAdapter
             Path = "/api",
             Expiration = TimeSpan.FromDays(30),
         };
-        var cookieOpts = cookieOptsBuilder.Build(context);
-        context.Response.Cookies.Append(CookieName, token, cookieOpts);
-
-        return Task.FromResult(true);
     }
 
     /// <inheritdoc />
     public Task SignOutAsync(HttpContext context, CancellationToken cancellationToken = default)
     {
-        if (context.Request.Cookies[CookieName] != null)
-            context.Response.Cookies.Delete(CookieName, new()
-            {
-                Expires = DateTimeOffset.MinValue,
-            });
+        if (context.Request.Cookies[CookieName] == null)
+            return Task.CompletedTask;
+
+        var options = ConfigureCookie().Build(context);
+        options.Expires = DateTimeOffset.MinValue;
+
+        context.Response.Cookies.Delete(CookieName, options);
 
         return Task.CompletedTask;
     }
