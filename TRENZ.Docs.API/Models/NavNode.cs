@@ -95,11 +95,11 @@ public class NavNode
     {
         return new(Location)
         {
-            Groups = Groups,
             Order = Order,
             HasContent = HasContent,
             HasHiddenChildren = HasHiddenChildren,
-            Children = Children?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone())
+            Groups = Groups.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray()),
+            Children = Children?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone()),
         };
     }
 
