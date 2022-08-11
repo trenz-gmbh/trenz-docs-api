@@ -12,7 +12,7 @@ public static class AuthAdapterExtensions
             var authSec = config.GetSection(section);
             if (authSec == null)
             {
-                throw new("'Auth' section not found in configuration!");
+                throw new($"'{section}' section not found in configuration!");
             }
 
             var authAdapterClass = authSec["Type"];
