@@ -45,8 +45,22 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithMethods("GET");
-        policy.AllowCredentials();
-        policy.WithOrigins("https://rbo-1.trenz.ag", "http://localhost:8080");
+
+        var allowedOrigins = builder.Configuration
+            .GetSection("AllowedOrigins")
+            .GetChildren()
+            .Select(c => c.Value)
+            .ToArray();
+
+        if (allowedOrigins.Length == 0)
+        {
+            policy.AllowAnyOrigin();
+        }
+        else
+        {
+            policy.AllowCredentials();
+            policy.WithOrigins(allowedOrigins);
+        }
     });
 });
 
