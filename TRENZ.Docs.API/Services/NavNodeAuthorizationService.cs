@@ -86,7 +86,7 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
 
             _logger.LogDebug($"Group {group} has permissions [{string.Join(", ", permissions)}] for node {node.Location}.");
         }
-        else if (node.Groups[group].Length > permissions.Length)
+        else if (node.Groups[group].Length >= permissions.Length)
         {
             var previous = node.Groups[group];
             node.Groups[group] = permissions;
