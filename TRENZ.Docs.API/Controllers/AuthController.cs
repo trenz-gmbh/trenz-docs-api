@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Web;
+using Microsoft.AspNetCore.Mvc;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Auth;
 
@@ -17,12 +18,21 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
+    private Task<IActionResult> LoginNotAvailableRespose(string returnUrl)
+    {
+        var uri = new UriBuilder(returnUrl);
+        var query = HttpUtility.ParseQueryString(uri.Query);
+        query["error"] = "login_not_available";
+        uri.Query = query.ToString();
+        return Task.FromResult<IActionResult>(Redirect(uri.ToString()));
+    }
+
     [HttpGet]
     public async Task<IActionResult> Transfer([FromQuery] string? returnUrl, CancellationToken cancellationToken = default)
     {
         returnUrl ??= Request.Headers.Referer.ToString();
         if (_authAdapter == null)
-            return Redirect(returnUrl); // MAYBE: append message telling user login is not available?
+            return await LoginNotAvailableRespose(returnUrl); // MAYBE: append message telling user login is not available?
 
         var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
 
@@ -35,7 +45,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Callback([FromQuery] string returnUrl, CancellationToken cancellationToken = default)
     {
         if (_authAdapter == null)
-            return Redirect(returnUrl); // MAYBE: append message telling user login is not available?
+            return await LoginNotAvailableRespose(returnUrl); // MAYBE: append message telling user login is not available?
 
         var success = await _authAdapter.HandleCallbackAsync(HttpContext, cancellationToken);
         if (!success)
