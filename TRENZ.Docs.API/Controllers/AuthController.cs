@@ -34,9 +34,18 @@ public class AuthController : ControllerBase
         if (_authAdapter == null)
             return await AppendErrorCode(returnUrl, "login_not_available");
 
-        var callbackUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Callback", "Auth")!}";
+        var callbackUrlBuilder = new UriBuilder(Request.Scheme, Request.Host.Host);
+        if (Request.Host.Port.HasValue)
+            callbackUrlBuilder.Port = Request.Host.Port.Value;
 
-        var request = new AuthenticateRequest(returnUrl, callbackUrl, _configuration["Branding:Color"], _configuration["Branding:Image"]);
+        callbackUrlBuilder.Path = Url.Action("Callback", "Auth");
+
+        var request = new AuthenticateRequest(
+            returnUrl,
+            callbackUrlBuilder.ToString(),
+            _configuration["Branding:Color"],
+            _configuration["Branding:Image"]
+        );
 
         return await _authAdapter.RedirectToSignInPageAsync(request, cancellationToken);
     }
