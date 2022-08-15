@@ -65,30 +65,30 @@ public class NavTree
 
                 return include;
             })
-            .Select(tup =>
+            .Select(kvp =>
             {
-                if (tup.Value.Children == null)
-                    return tup;
+                if (kvp.Value.Children == null)
+                    return kvp;
 
                 Dictionary<string, NavNode>? children = null;
                 var childExcluded = false;
-                if (includeChildren(tup.Value))
-                    children = FilterChildrenBy(tup.Value.Children, includeNode, includeContent, includeChildren, () => childExcluded = true);
+                if (includeChildren(kvp.Value))
+                    children = FilterChildrenBy(kvp.Value.Children, includeNode, includeContent, includeChildren, () => childExcluded = true);
 
-                var hasContent = tup.Value.HasContent;
-                if (includeContent(tup.Value))
+                var hasContent = kvp.Value.HasContent;
+                if (includeContent(kvp.Value))
                 {
                     hasContent = false;
                     onNodeExcluded?.Invoke();
                 }
 
-                var newNode = tup.Value.Clone();
+                var newNode = kvp.Value.Clone();
                 newNode.Children = children is { Count: > 0 } ? children : null;
                 newNode.HasContent = hasContent;
                 newNode.HasHiddenChildren = childExcluded;
 
                 return new(
-                    tup.Key,
+                    kvp.Key,
                     newNode
                 );
             })
