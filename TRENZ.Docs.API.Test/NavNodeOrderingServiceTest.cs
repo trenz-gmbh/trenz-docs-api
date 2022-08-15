@@ -30,11 +30,15 @@ public class NavNodeOrderingServiceTest
         });
 
         Assert.IsTrue(tree.Root.All(kvp => kvp.Value.Order == 0));
-        
+
         await service.ReorderTreeAsync(tree);
 
-        Assert.IsTrue(tree.Root.Zip(new[] { 0, 3, 2, 1 }).All(tuple => tuple.First.Value.Order == tuple.Second));
+        var actualOrder = tree.Root.Select(kvp => kvp.Value.Order);
+        var expectedOrder = new[] { 0, 3, 2, 1 };
+
+        Assert.IsTrue(actualOrder.SequenceEqual(expectedOrder));
     }
+
     [TestMethod]
     public async Task TestReorderSimpleTreeWithOrderFile()
     {
@@ -58,9 +62,11 @@ public class NavNodeOrderingServiceTest
         });
 
         Assert.IsTrue(tree.Root.All(kvp => kvp.Value.Order == 0));
-        
+
         await service.ReorderTreeAsync(tree);
-        
-        Assert.IsTrue(tree.Root.Zip(new[] { 2, 0, 1, -1 }).All(tuple => tuple.First.Value.Order == tuple.Second));
+
+        var actualOrder = tree.Root.Select(kvp => kvp.Value.Order);
+        var expectedOrder = new[] { 2, 0, 1, -1 };
+        Assert.IsTrue(actualOrder.SequenceEqual(expectedOrder));
     }
 }
