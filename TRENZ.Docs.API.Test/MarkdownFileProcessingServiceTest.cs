@@ -10,7 +10,7 @@ public class MarkdownFileProcessingServiceTest
 {
     public static IEnumerable<object[]> ProcessFileDataProvider()
     {
-        var testConfig = new LocalSource("Test", "./Data" );
+        var testConfig = new LocalSource("Test", Path.Combine(Environment.CurrentDirectory, "Data"));
 
         yield return new object[]
         {
