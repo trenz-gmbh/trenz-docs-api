@@ -1,11 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
-using System.Text;
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
+using TRENZ.Docs.API.AuthLib;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models.Auth;
-using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace TRENZ.Docs.API.Services.Auth;
 
@@ -29,7 +26,7 @@ public class JwtCookieAuthAdapter : IAuthAdapter
     /// <inheritdoc />
     public Task<IActionResult> RedirectToSignInPageAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
     {
-        var endpoint = SignEndpoint(
+        var endpoint = Signature.SignEndpoint(
             Endpoint,
             new Dictionary<string, string?>
             {
@@ -52,7 +49,7 @@ public class JwtCookieAuthAdapter : IAuthAdapter
         if (query == null)
             return Task.FromResult(false);
 
-        if (!ValidateSignature(query, ClientSecret))
+        if (!Signature.ValidateSignature(query, ClientSecret))
             return Task.FromResult(false);
 
         var success = bool.Parse(context.Request.Query["success"].ToString());
@@ -109,54 +106,5 @@ public class JwtCookieAuthAdapter : IAuthAdapter
             .Select(c => c.Value);
 
         return Task.FromResult<IEnumerable<string>?>(claims);
-    }
-
-    private static string SignEndpoint(
-        string endpoint,
-        IDictionary<string, string?> queryParams,
-        string secret
-    )
-    {
-        var uri = new UriBuilder(endpoint);
-
-        var query = HttpUtility.ParseQueryString(uri.Query);
-        foreach (var (key, value) in queryParams)
-        {
-            query[key] = value;
-        }
-
-        var payload = query.ToString()!;
-        var signature = GenerateSignature(secret, payload);
-        query["signature"] = signature;
-
-        uri.Query = query.ToString();
-
-        return uri.ToString();
-    }
-
-    private static bool ValidateSignature(
-        string query,
-        string secret
-    )
-    {
-        var collection = HttpUtility.ParseQueryString(query);
-        if (collection["signature"] == null)
-            return false;
-
-        var signature = collection["signature"];
-        collection.Remove("signature");
-
-        var payload = collection.ToString()!;
-        var expectedSignature = GenerateSignature(secret, payload);
-
-        return signature == expectedSignature;
-    }
-
-    private static string GenerateSignature(string secret, string payload)
-    {
-        var key = Encoding.UTF8.GetBytes(secret);
-        using var hash = new HMACSHA256(key);
-        var signature = hash.ComputeHash(Encoding.UTF8.GetBytes(payload));
-        return Convert.ToBase64String(signature);
     }
 }
