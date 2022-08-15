@@ -25,7 +25,7 @@ public sealed class LocalSource : AbstractFilesystemSource
             configuration["Path"] ?? ""
         );
     }
-    
+
     public override SourceType Type => SourceType.Local;
     public override string Name { get; }
     public override string Root { get; }
