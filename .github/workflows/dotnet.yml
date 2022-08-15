@@ -22,6 +22,7 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: ${{ matrix.version }}
+        include-prerelease: true
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
