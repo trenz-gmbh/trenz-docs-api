@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        version: [6.0.x,7.0.x]
+        version: [6.0.x]
 
     runs-on: ${{ matrix.os }}
 
@@ -22,7 +22,6 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: ${{ matrix.version }}
-        include-prerelease: true
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
