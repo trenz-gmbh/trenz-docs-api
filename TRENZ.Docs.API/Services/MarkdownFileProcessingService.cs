@@ -93,7 +93,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 path = RewriteLink(path);
             }
 
-            link.Url = HttpUtility.UrlPathEncode(NavNode.PathToLocation(path));
+            link.Url = path;
             if (link.Reference != null) link.Reference.Url = null;
         }
     }
@@ -104,11 +104,19 @@ public class MarkdownFileProcessingService : IFileProcessingService
         parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
 
         var location = parent + orignalUrl;
+        if (location.StartsWith("."))
+        {
+            // only encoding when necessary to get cleaner URLs by default
+            location = HttpUtility.UrlEncode(location);
+        }
+
         return $"%API_HOST%/File/{location}";
     }
 
     private static string RewriteLink(string originalUrl)
     {
-        return originalUrl.EndsWith(".md") ? originalUrl[..^3] : originalUrl;
+        var location = NavNode.PathToLocation(originalUrl.EndsWith(".md") ? originalUrl[..^3] : originalUrl);
+
+        return HttpUtility.UrlPathEncode(location);
     }
 }
