@@ -41,4 +41,10 @@ public class PhysicalSourceFile : ISourceFile
 
     /// <inheritdoc />
     public Task<string[]> GetLinesAsync(CancellationToken cancellationToken = default) => File.ReadAllLinesAsync(AbsolutePhysicalPath, cancellationToken);
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"{nameof(PhysicalSourceFile)}: ({Source.Name}) {AbsolutePhysicalPath}";
+    }
 }
