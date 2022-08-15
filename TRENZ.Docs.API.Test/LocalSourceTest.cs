@@ -73,28 +73,27 @@ public class LocalSourceTest
 
     public static IEnumerable<object[]> FindFilesValuesProvider()
     {
+        var source = new LocalSource("Test", Path.Combine(Environment.CurrentDirectory, "Data"));
+
         yield return new object[]
         {
             ".*\\.md$",
-            new Dictionary<string, string> { { "Type", "local" }, { "Name", "Test" }, { "Root", "./Data/" } },
+            source,
             new[] { "Image.md", "Test.md", "Nested" + Path.DirectorySeparatorChar + "Text.md" },
         };
 
         yield return new object[]
         {
             "\\.order",
-            new Dictionary<string, string> { { "Type", "local" }, { "Name", "Test" }, { "Root", "./Data/" } },
+            source,
             new[] { ".order", "Nested" + Path.DirectorySeparatorChar + ".order" },
         };
     }
 
     [DataTestMethod]
     [DynamicData(nameof(FindFilesValuesProvider), DynamicDataSourceType.Method)]
-    public void TestFindFiles(string pattern, Dictionary<string, string> config, IEnumerable<string> relativePaths)
+    public void TestFindFiles(string pattern, ISource source, IEnumerable<string> relativePaths)
     {
-        var configuration = TestHelper.GetConfiguration(config);
-        var source = LocalSource.FromConfiguration(configuration);
-
         var files = source.FindFiles(new(pattern)).Select(sf => sf.RelativePath);
 
         Assert.IsTrue(relativePaths.SequenceEqual(files));
