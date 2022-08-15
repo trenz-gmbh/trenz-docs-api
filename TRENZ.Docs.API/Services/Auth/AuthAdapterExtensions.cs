@@ -24,7 +24,7 @@ public static class AuthAdapterExtensions
             var authAdapterType = Type.GetType(authAdapterClass);
             if (authAdapterType == null)
             {
-                throw new($"Adapter class '{authAdapterClass}' does not exist! It must be a fully qualified assembly name or the class implementing IAuthAdapter.");
+                throw new($"Adapter class '{authAdapterClass}' does not exist! It must be a fully qualified assembly name of the class implementing IAuthAdapter.");
             }
 
             var instance = ActivatorUtilities.CreateInstance(provider, authAdapterType);
