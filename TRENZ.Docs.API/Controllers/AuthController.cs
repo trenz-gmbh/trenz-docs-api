@@ -83,9 +83,11 @@ public class AuthController : ControllerBase
         return claims != null;
     }
 
+#if DEBUG
     [HttpGet]
     public async Task<IEnumerable<string>?> Claims(CancellationToken cancellationToken = default)
     {
         return _authAdapter is null ? null : await _authAdapter.GetClaimsAsync(HttpContext, cancellationToken);
     }
+#endif
 }
