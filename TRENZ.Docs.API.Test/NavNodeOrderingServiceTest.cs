@@ -67,6 +67,7 @@ public class NavNodeOrderingServiceTest
 
         var actualOrder = tree.Root.Select(kvp => kvp.Value.Order);
         var expectedOrder = new[] { 2, 0, 1, -1 };
+
         Assert.IsTrue(actualOrder.SequenceEqual(expectedOrder));
     }
 }
