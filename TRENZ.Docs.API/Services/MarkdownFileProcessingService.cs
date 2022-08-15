@@ -55,8 +55,8 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 var content = await f.GetTextAsync(cancellationToken);
                 var document = Markdown.Parse(content, markdownPipeline);
 
-                UpdateImageLinks(f, document);
-                
+                RewriteLinks(f, document);
+
                 var builder = new StringBuilder();
                 var writer = new StringWriter(builder);
                 var renderer = new NormalizeRenderer(writer);
@@ -71,24 +71,44 @@ public class MarkdownFileProcessingService : IFileProcessingService
             }
     }
 
-    private static void UpdateImageLinks(ISourceFile file, MarkdownObject markdownObject)
+    private static void RewriteLinks(ISourceFile file, MarkdownObject markdownObject)
     {
         foreach (var child in markdownObject.Descendants())
         {
-            if (child is not LinkInline { IsImage: true } link) continue;
+            if (child is not LinkInline link)
+                continue;
 
-            var parent = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
-            parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
-
-            var location = parent + link.Url;
-            if (location.StartsWith("."))
+            var path = HttpUtility.UrlDecode(link.Url ?? "");
+            if (link.IsImage)
             {
-                // only encoding when necessary to get cleaner URLs by default
-                location = HttpUtility.UrlEncode(location);
+                path = RewriteImageLink(path, file);
+            }
+            else
+            {
+                if (Uri.TryCreate(path, UriKind.Absolute, out _))
+                {
+                    continue;
+                }
+
+                path = RewriteLink(path);
             }
 
-            link.Url = $"%API_HOST%/File/{location}";
+            link.Url = HttpUtility.UrlPathEncode(NavNode.PathToLocation(path));
             if (link.Reference != null) link.Reference.Url = null;
         }
+    }
+
+    private static string RewriteImageLink(string? orignalUrl, ISourceFile file)
+    {
+        var parent = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
+        parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
+
+        var location = parent + orignalUrl;
+        return $"%API_HOST%/File/{location}";
+    }
+
+    private static string RewriteLink(string originalUrl)
+    {
+        return originalUrl.EndsWith(".md") ? originalUrl[..^3] : originalUrl;
     }
 }
