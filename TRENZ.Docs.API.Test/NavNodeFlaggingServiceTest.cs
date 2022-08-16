@@ -14,7 +14,7 @@ public class NavNodeFlaggingServiceTest
         yield return new object[]
         {
             new Dictionary<string, NavNode> { { "root", new("root") } },
-            new List<ISourceFile> { new MemorySourceFile("uid", "root", "root", "root content") },
+            new List<ISourceFile> { new MemorySourceFile("uid", "root", "root.md", "root content", "root") },
             new Dictionary<string, NavNode> { { "root", new("root") { HasContent = true } } },
         };
 
@@ -34,8 +34,8 @@ public class NavNodeFlaggingServiceTest
             },
             new List<ISourceFile>
             {
-                new MemorySourceFile("uid", "root", "root", "root content"),
-                new MemorySourceFile("uid2", "nested", "root/nested", "nested content"),
+                new MemorySourceFile("uid", "root", "root.md", "root content", "root"),
+                new MemorySourceFile("uid2", "nested", Path.Combine("root", "nested.md"), "nested content", "root/nested"),
             },
             new Dictionary<string, NavNode>
             {

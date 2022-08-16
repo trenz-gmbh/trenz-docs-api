@@ -34,7 +34,7 @@ public class NavTreeProviderTest
             new List<ISourceFile>
             {
                 new MemorySourceFile("uid1", "node1", "node1", "node1 content"),
-                new MemorySourceFile("uid2", "node2", "nested/in/tree/node2", "node2 content"),
+                new MemorySourceFile("uid2", "node2", Path.Combine("nested", "in", "tree", "node2"), "node2 content"),
             },
             new Dictionary<string, NavNode>
             {
