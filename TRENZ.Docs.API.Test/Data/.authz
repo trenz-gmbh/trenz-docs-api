@@ -1,0 +1,6 @@
+﻿[Test]
+default = []
+users = ["read"]
+
+[Nested]
+default = ["list"]

@@ -41,6 +41,14 @@
       <Content Include="Data\Nested\.order">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Data\Nested\.authz" />
+      <Content Include="Data\Nested\.authz">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Data\.authz" />
+      <Content Include="Data\.authz">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
