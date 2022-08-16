@@ -15,6 +15,7 @@ public class TomlAuthzPermissionTableProviderTest
 
         var tables = await provider.GetPermissionTablesAsync().ToListAsync();
 
+        // all tables from ./Data/.authz and ./Data/Nested/.authz, ./Data/Invalid/.authz is ignored
         Assert.AreEqual(3, tables.Count);
 
         var table = tables[0];
