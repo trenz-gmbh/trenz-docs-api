@@ -34,13 +34,13 @@ public class PhysicalSourceFile : ISourceFile
     public string Uid { get; }
 
     /// <inheritdoc />
-    public Task<byte[]> GetBytesAsync(CancellationToken cancellationToken = default) => File.ReadAllBytesAsync(AbsolutePhysicalPath, cancellationToken);
+    public async Task<byte[]> GetBytesAsync(CancellationToken cancellationToken = default) => await File.ReadAllBytesAsync(AbsolutePhysicalPath, cancellationToken);
  
     /// <inheritdoc />
-    public Task<string> GetTextAsync(CancellationToken cancellationToken = default) => File.ReadAllTextAsync(AbsolutePhysicalPath, cancellationToken);
+    public async Task<string> GetTextAsync(CancellationToken cancellationToken = default) => await File.ReadAllTextAsync(AbsolutePhysicalPath, cancellationToken);
 
     /// <inheritdoc />
-    public Task<string[]> GetLinesAsync(CancellationToken cancellationToken = default) => File.ReadAllLinesAsync(AbsolutePhysicalPath, cancellationToken);
+    public async Task<string[]> GetLinesAsync(CancellationToken cancellationToken = default) => await File.ReadAllLinesAsync(AbsolutePhysicalPath, cancellationToken);
 
     /// <inheritdoc />
     public override string ToString()

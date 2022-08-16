@@ -9,8 +9,8 @@ namespace TRENZ.Docs.API.Interfaces
     /// If a <c>.order</c> file exists, it defines the canonical order. If it doesn't,
     /// nodes are ordered alphabetically.</para>
     /// </summary>
-    public interface ITreeOrderService
+    public interface INavNodeOrderingService
     {
-        Task ReorderTree(Dictionary<string, NavNode> tree);
+        Task ReorderTreeAsync(NavTree tree, CancellationToken cancellationToken = default);
     }
 }

@@ -12,8 +12,9 @@ namespace TRENZ.Docs.API
         private readonly IIndexingService _indexingService;
         private readonly ISourcesProvider _sourcesProvider;
         private readonly IFileProcessingService _fileProcessingService;
+        private readonly INavTreeProvider _navTreeProvider;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration, IHostApplicationLifetime lifetime, IIndexingService indexingService, ISourcesProvider sourcesProvider, IFileProcessingService fileProcessingService)
+        public Worker(ILogger<Worker> logger, IConfiguration configuration, IHostApplicationLifetime lifetime, IIndexingService indexingService, ISourcesProvider sourcesProvider, IFileProcessingService fileProcessingService, INavTreeProvider navTreeProvider)
         {
             _logger = logger;
             _configuration = configuration;
@@ -21,6 +22,7 @@ namespace TRENZ.Docs.API
             _indexingService = indexingService;
             _sourcesProvider = sourcesProvider;
             _fileProcessingService = fileProcessingService;
+            _navTreeProvider = navTreeProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,8 +31,20 @@ namespace TRENZ.Docs.API
             {
                 _logger.LogInformation("Running at {Time}", DateTimeOffset.Now);
 
-                var files = GatherFiles(stoppingToken);
-                var indexFiles = await _fileProcessingService.ProcessAsync(files, stoppingToken).ToListAsync(cancellationToken: stoppingToken);
+                var sourceFiles = await GatherFiles(stoppingToken).ToListAsync(stoppingToken);
+                var tree = await _navTreeProvider.RebuildAsync(sourceFiles, stoppingToken);
+
+                var indexTree = tree.WithoutHiddenNodes().WithoutChildlessContentlessNodes();
+                var markdownFiles = sourceFiles
+                    .Where(file => file.RelativePath.EndsWith(".md"))
+                    .Select(file => (file, node: indexTree.FindNodeByLocation(file.Location)))
+                    .Where(tup => tup.node is not null)
+                    .Select(tup => tup.file);
+
+                var indexFiles = await _fileProcessingService
+                    .ProcessAsync(markdownFiles, stoppingToken)
+                    .ToListAsync(stoppingToken);
+
                 await _indexingService.IndexAsync(indexFiles, stoppingToken);
 
                 if (_configuration["TrenzDocsApi:OneShot"] == "true")
@@ -62,9 +76,9 @@ namespace TRENZ.Docs.API
 
                 _logger.LogInformation("Gathering files from {Source}", source);
 
-                foreach (var repositoryFile in source.FindFiles(new(".*\\.md$")))
+                foreach (var sourceFile in source.FindFiles(new(".+")))
                 {
-                    yield return repositoryFile;
+                    yield return sourceFile;
                 }
             }
 
