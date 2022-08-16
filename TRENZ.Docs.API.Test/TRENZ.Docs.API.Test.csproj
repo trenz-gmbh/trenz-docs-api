@@ -49,6 +49,10 @@
       <Content Include="Data\.authz">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Data\Invalid\.authz" />
+      <Content Include="Data\Invalid\.authz">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
