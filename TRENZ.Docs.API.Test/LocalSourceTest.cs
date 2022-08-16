@@ -96,6 +96,6 @@ public class LocalSourceTest
     {
         var files = source.FindFiles(new(pattern)).Select(sf => sf.RelativePath);
 
-        Assert.AreEqual(string.Join(Path.DirectorySeparatorChar, relativePaths), string.Join(Path.DirectorySeparatorChar, files));
+        CollectionAssert.AreEquivalent(relativePaths.ToArray(), files.ToArray());
     }
 }
