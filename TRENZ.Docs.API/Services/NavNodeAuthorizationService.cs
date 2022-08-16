@@ -1,76 +1,40 @@
-﻿using Tomlyn;
-using Tomlyn.Syntax;
-using TRENZ.Docs.API.Interfaces;
+﻿using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
 
 namespace TRENZ.Docs.API.Services;
 
 public class NavNodeAuthorizationService : INavNodeAuthorizationService
 {
-    private readonly ISourcesProvider _sourcesProvider;
+    private readonly IPermissionTableProvider _permissionTableProvider;
     private readonly ILogger<NavNodeAuthorizationService> _logger;
 
     public NavNodeAuthorizationService(
-        ISourcesProvider sourcesProvider,
+        IPermissionTableProvider permissionTableProvider,
         ILogger<NavNodeAuthorizationService> logger
     )
     {
-        _sourcesProvider = sourcesProvider;
+        _permissionTableProvider = permissionTableProvider;
         _logger = logger;
     }
 
     /// <inheritdoc />
     public async Task UpdateGroupsAsync(NavTree tree, CancellationToken cancellationToken = default)
     {
-        var authzFiles = _sourcesProvider.GetSources()
-            .SelectMany(source => source.FindFiles(new("\\.authz")))
-            .ToDictionary(
-                sf => sf.RelativePath.Split(Path.DirectorySeparatorChar)[..^1],
-                sf => sf
-            )
-            .OrderBy(kvp => kvp.Key.Length);
-
-        foreach (var (path, authzFile) in authzFiles)
+        await foreach (var table in _permissionTableProvider.GetPermissionTablesAsync(cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var text = await authzFile.GetTextAsync(cancellationToken);
-            var parsed = Toml.Parse(text, options: TomlParserOptions.ParseAndValidate);
-            if (parsed.HasErrors)
-            {
-                _logger.LogError($"Authz at '{authzFile.RelativePath}' contains syntax errors and is therefore ignored.");
-
-                continue;
-            }
-
-            await ProcessTables(tree, path, parsed, cancellationToken);
-        }
-    }
-
-    private async Task ProcessTables(NavTree tree, string[] path, DocumentSyntax document, CancellationToken cancellationToken = default)
-    {
-        _logger.LogDebug($"Processing authz document at '{string.Join("/", path)}/.authz'.");
-
-        foreach (var table in document.Tables)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var nodePath = path.Append(table.Name!.ToString()).ToArray();
-            var node = tree.FindNodeByLocationParts(nodePath);
+            var node = tree.FindNodeByLocationParts(table.LocationParts);
             if (node == null)
             {
-                _logger.LogWarning($"Authz at '{string.Join("/", path)}/.authz' contains a table for a node at '{string.Join("/", nodePath)}' which does not exist.");
+                _logger.LogWarning("Authz at '{Location}/.authz' contains a table for a node at '{Location}' which does not exist.", string.Join("/", table.LocationParts));
 
                 continue;
             }
 
-            foreach (var item in table.Items)
+            foreach (var row in table.Groups)
             {
-                // FIXME: there has to be a better way instead of... this.
-                var group = (item.Key!.Key! as BareKeySyntax)!.Key!.Text!;
-                var permissions = (item.Value as ArraySyntax)!.Items.Select(s => (s.Value as StringValueSyntax)!.Value!.Trim());
-
-                await SetGroupsRecursivelyAsync(node, group, permissions.ToArray(), cancellationToken);
+                await SetGroupsRecursivelyAsync(node, row.Key, row.Value, cancellationToken);
             }
         }
     }
@@ -84,18 +48,18 @@ public class NavNodeAuthorizationService : INavNodeAuthorizationService
         {
             node.Groups[group] = permissions;
 
-            _logger.LogDebug($"Group {group} has permissions [{string.Join(", ", permissions)}] for node {node.Location}.");
+            _logger.LogDebug("Group {Group} has permissions [{Permissions}] for node '{Location}'", group, string.Join(", ", permissions), node.Location);
         }
         else if (node.Groups[group].Length >= permissions.Length)
         {
             var previous = node.Groups[group];
             node.Groups[group] = permissions;
 
-            _logger.LogDebug($"Updated permissions for group {group} to [{string.Join(",", permissions)}] for node {node.Location} (was [{string.Join(",", previous)}]).");
+            _logger.LogDebug("Updated permissions for group {Group} to [{Permissions}] for node '{Location}' (was [{OldPermissions}])", group, string.Join(",", permissions), node.Location, string.Join(",", previous));
         }
         else
         {
-            _logger.LogDebug($"Skipping updating permissions for group {group} for node {node.Location} because the current permissions are already more restrictive ({string.Join(",", node.Groups[group])} <=> {string.Join(",", permissions)}).");
+            _logger.LogDebug("Skipping updating permissions for group {Group} for node '{Location}' because the current permissions are already more restrictive ([{Permissions}] <=> [{NewPermissions}])", group, node.Location, string.Join(",", node.Groups[group]), string.Join(",", permissions));
         }
 
         if (node.Children == null)

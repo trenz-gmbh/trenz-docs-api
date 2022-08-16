@@ -23,6 +23,7 @@ builder.Services.AddSingleton<INavTreeProvider, NavTreeProvider>();
 builder.Services.AddSingleton<INavNodeOrderingService, NavNodeOrderingService>();
 builder.Services.AddSingleton<INavNodeFlaggingService, NavNodeFlaggingService>();
 builder.Services.AddSingleton<INavNodeAuthorizationService, NavNodeAuthorizationService>();
+builder.Services.AddSingleton<IPermissionTableProvider, TomlAuthzPermissionTableProvider>();
 
 if (builder.Configuration.GetSection("Auth") != null)
 {
