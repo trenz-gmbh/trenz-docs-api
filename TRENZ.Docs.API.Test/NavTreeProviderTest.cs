@@ -1,8 +1,9 @@
 ﻿using Moq;
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models.Sources;
 using TRENZ.Docs.API.Services;
+using TRENZ.Docs.API.Test.Models.Sources;
 
 namespace TRENZ.Docs.API.Test;
 
@@ -14,11 +15,11 @@ public class NavTreeProviderTest
     {
         yield return new object[]
         {
-            new List<IndexFile>
+            new List<ISourceFile>
             {
-                new("uid1", "node1", "node1 content", "node1"),
-                new("uid2", "node2", "node2 content", "node2"),
-                new("uid3", "node3", "node3 content", "node3"),
+                new MemorySourceFile("uid1", "node1", "node1", "node1 content"),
+                new MemorySourceFile("uid2", "node2", "node2", "node2 content"),
+                new MemorySourceFile("uid3", "node3", "node3", "node3 content"),
             },
             new Dictionary<string, NavNode>
             {
@@ -30,10 +31,10 @@ public class NavTreeProviderTest
 
         yield return new object[]
         {
-            new List<IndexFile>
+            new List<ISourceFile>
             {
-                new("uid1", "node1", "node1 content", "node1"),
-                new("uid2", "node2", "node2 content", "nested/in/tree/node2"),
+                new MemorySourceFile("uid1", "node1", "node1", "node1 content"),
+                new MemorySourceFile("uid2", "node2", "nested/in/tree/node2", "node2 content"),
             },
             new Dictionary<string, NavNode>
             {
@@ -69,7 +70,7 @@ public class NavTreeProviderTest
 
     [DataTestMethod]
     [DynamicData(nameof(BuildTreeAsyncValuesProvider), DynamicDataSourceType.Method)]
-    public async Task TestBuildTreeAsync(List<IndexFile> indexFiles, Dictionary<string, NavNode> expectedTree)
+    public async Task TestBuildTreeAsync(List<ISourceFile> indexFiles, Dictionary<string, NavNode> expectedTree)
     {
         var nodeFlaggerMock = new Mock<INavNodeFlaggingService>();
         nodeFlaggerMock.Setup(flagger => flagger.UpdateHasContentFlagAsync(new(), indexFiles, default)).Returns(Task.CompletedTask);

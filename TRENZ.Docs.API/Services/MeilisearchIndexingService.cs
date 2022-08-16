@@ -29,7 +29,7 @@ public class MeilisearchIndexingService : IIndexingService
     }
 
     /// <inheritdoc />
-    public async Task IndexAsync(List<IndexFile> files, CancellationToken cancellationToken = default)
+    public async Task IndexAsync(IEnumerable<IndexFile> files, CancellationToken cancellationToken = default)
     {
         var health = await _client.HealthAsync(cancellationToken);
         _logger.LogInformation("Meilisearch is {Status}", health.Status);
@@ -59,8 +59,6 @@ public class MeilisearchIndexingService : IIndexingService
         }
 
         _lastIndexingTime = DateTimeOffset.UtcNow;
-
-        await _navTreeProvider.RebuildAsync(files, cancellationToken);
     }
 
     /// <inheritdoc />

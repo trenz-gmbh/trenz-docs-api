@@ -1,6 +1,7 @@
 ﻿using TRENZ.Docs.API.Models;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models.Sources;
 using TRENZ.Docs.API.Services;
+using TRENZ.Docs.API.Test.Models.Sources;
 
 namespace TRENZ.Docs.API.Test;
 
@@ -13,7 +14,7 @@ public class NavNodeFlaggingServiceTest
         yield return new object[]
         {
             new Dictionary<string, NavNode> { { "root", new("root") } },
-            new List<IndexFile> { new("uid", "root", "root content", "root") },
+            new List<ISourceFile> { new MemorySourceFile("uid", "root", "root", "root content") },
             new Dictionary<string, NavNode> { { "root", new("root") { HasContent = true } } },
         };
 
@@ -31,10 +32,10 @@ public class NavNodeFlaggingServiceTest
                     }
                 },
             },
-            new List<IndexFile>
+            new List<ISourceFile>
             {
-                new("uid", "root", "root content", "root"),
-                new("uid2", "nested", "nested content", "root/nested"),
+                new MemorySourceFile("uid", "root", "root", "root content"),
+                new MemorySourceFile("uid2", "nested", "root/nested", "nested content"),
             },
             new Dictionary<string, NavNode>
             {
@@ -59,12 +60,12 @@ public class NavNodeFlaggingServiceTest
 
     [DataTestMethod]
     [DynamicData(nameof(UpdateHasContentFlagValuesProvider), DynamicDataSourceType.Method)]
-    public async Task TestUpdateHasContentFlag(Dictionary<string, NavNode> tree, List<IndexFile> indexFiles,
+    public async Task TestUpdateHasContentFlag(Dictionary<string, NavNode> tree, List<ISourceFile> files,
         Dictionary<string, NavNode> expectedTree)
     {
         var service = new NavNodeFlaggingService();
 
-        await service.UpdateHasContentFlagAsync(tree, indexFiles);
+        await service.UpdateHasContentFlagAsync(tree, files);
 
         Assert.IsTrue(
             tree.DeepSequenceEquals(

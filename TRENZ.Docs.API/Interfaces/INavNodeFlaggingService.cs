@@ -1,9 +1,9 @@
 ﻿using TRENZ.Docs.API.Models;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models.Sources;
 
 namespace TRENZ.Docs.API.Interfaces;
 
 public interface INavNodeFlaggingService
 {
-    Task UpdateHasContentFlagAsync(Dictionary<string, NavNode> tree, List<IndexFile> indexFiles, CancellationToken cancellationToken = default);
+    Task UpdateHasContentFlagAsync(Dictionary<string, NavNode> tree, List<ISourceFile> files, CancellationToken cancellationToken = default);
 }

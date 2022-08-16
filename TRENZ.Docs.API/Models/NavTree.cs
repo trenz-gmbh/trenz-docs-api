@@ -57,14 +57,6 @@ public class NavTree
         includeChildren ??= _ => true;
 
         return subtree
-            .Where(kvp =>
-            {
-                var include = includeNode(kvp.Value);
-                if (!include)
-                    onNodeExcluded?.Invoke();
-
-                return include;
-            })
             .Select(kvp =>
             {
                 if (kvp.Value.Children == null)
@@ -91,6 +83,14 @@ public class NavTree
                     kvp.Key,
                     newNode
                 );
+            })
+            .Where(kvp =>
+            {
+                var include = includeNode(kvp.Value);
+                if (!include)
+                    onNodeExcluded?.Invoke();
+
+                return include;
             })
             .ToDictionary(
                 kvp => kvp.Key,

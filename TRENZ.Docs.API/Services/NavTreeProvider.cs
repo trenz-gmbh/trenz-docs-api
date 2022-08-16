@@ -1,6 +1,6 @@
 ﻿using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
-using TRENZ.Docs.API.Models.Index;
+using TRENZ.Docs.API.Models.Sources;
 
 namespace TRENZ.Docs.API.Services;
 
@@ -18,18 +18,23 @@ public class NavTreeProvider : INavTreeProvider
     }
 
     /// <inheritdoc />
-    public async Task<NavTree> RebuildAsync(List<IndexFile> indexFiles, CancellationToken cancellationToken = default)
+    public async Task<NavTree> RebuildAsync(List<ISourceFile> files, CancellationToken cancellationToken = default)
     {
         var root = new Dictionary<string, NavNode>();
 
-        foreach (var file in indexFiles)
+        foreach (var file in files)
         {
-            var path = file.location.Split(NavNode.Separator);
+            var path = file.RelativePath.Split(Path.DirectorySeparatorChar);
             var currentPath = new List<string>();
             var node = root;
             for (var i = 0; i < path.Length; i++)
             {
                 var part = path[i];
+                if (part.EndsWith(".md"))
+                {
+                    part = part[..^3];
+                }
+
                 currentPath.Add(part);
 
                 if (!node.ContainsKey(part))
@@ -46,14 +51,14 @@ public class NavTreeProvider : INavTreeProvider
 
         Tree = new(root);
 
-        await PostProcessTree(indexFiles, cancellationToken);
+        await PostProcessTree(files, cancellationToken);
 
         return Tree;
     }
 
-    private async Task PostProcessTree(List<IndexFile> indexFiles, CancellationToken cancellationToken)
+    private async Task PostProcessTree(List<ISourceFile> files, CancellationToken cancellationToken)
     {
-        await _flaggingService.UpdateHasContentFlagAsync(Tree.Root, indexFiles, cancellationToken);
+        await _flaggingService.UpdateHasContentFlagAsync(Tree.Root, files, cancellationToken);
         await _orderingService.ReorderTreeAsync(Tree, cancellationToken);
         await _authorizationService.UpdateGroupsAsync(Tree, cancellationToken);
     }
