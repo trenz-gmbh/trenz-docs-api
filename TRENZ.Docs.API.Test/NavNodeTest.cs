@@ -11,8 +11,8 @@ public class NavNodeTest
         yield return new object[] { new NavNode("location") };
         yield return new object[] { new NavNode("location") { Order = 1 } };
         yield return new object[] { new NavNode("location") { Order = 1, HasContent = true } };
-        yield return new object[] { new NavNode("location") { Order = 1, HasContent = true, HasHiddenChildren = true } };
-        yield return new object[] { new NavNode("location") { Order = 1, HasContent = true, HasHiddenChildren = true, Children = new() { { "child", new("location/child") } } } };
+        yield return new object[] { new NavNode("location") { Order = 1, HasContent = true, ContainsUnauthorizedChildren = true } };
+        yield return new object[] { new NavNode("location") { Order = 1, HasContent = true, ContainsUnauthorizedChildren = true, Children = new() { { "child", new("location/child") } } } };
     }
 
     [DataTestMethod]
@@ -28,7 +28,7 @@ public class NavNodeTest
             Assert.AreEqual(originalNode.Location, clonedNode.Location);
             Assert.AreEqual(originalNode.Order, clonedNode.Order);
             Assert.AreEqual(originalNode.HasContent, clonedNode.HasContent);
-            Assert.AreEqual(originalNode.HasHiddenChildren, clonedNode.HasHiddenChildren);
+            Assert.AreEqual(originalNode.ContainsUnauthorizedChildren, clonedNode.ContainsUnauthorizedChildren);
 
             Assert.AreNotSame(original.Groups, clone.Groups);
             Assert.IsTrue(

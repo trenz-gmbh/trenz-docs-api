@@ -57,7 +57,7 @@ public class NavNode
     /// <summary>
     /// Whether or not this node contains children which were filtered out due to permissions.
     /// </summary>
-    public bool HasHiddenChildren { get; set; }
+    public bool ContainsUnauthorizedChildren { get; set; }
 
     /// <summary>
     /// The display name of the node in the tree. This is the last part of <see cref="Location" />.
@@ -97,7 +97,7 @@ public class NavNode
         {
             Order = Order,
             HasContent = HasContent,
-            HasHiddenChildren = HasHiddenChildren,
+            ContainsUnauthorizedChildren = ContainsUnauthorizedChildren,
             Groups = Groups.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray()),
             Children = Children?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone()),
         };

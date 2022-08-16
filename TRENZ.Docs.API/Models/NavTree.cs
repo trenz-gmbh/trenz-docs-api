@@ -5,19 +5,19 @@
 // ReSharper disable UnusedMember.Global
 public class NavTree
 {
-    public NavTree(Dictionary<string, NavNode> root, bool hasHiddenNodes = false)
+    public NavTree(Dictionary<string, NavNode> root, bool containsUnauthorizedChildren = false)
     {
         Root = root;
-        HasHiddenNodes = hasHiddenNodes;
+        ContainsUnauthorizedChildren = containsUnauthorizedChildren;
     }
 
     public Dictionary<string, NavNode> Root { get; }
 
-    public bool HasHiddenNodes { get; }
+    public bool ContainsUnauthorizedChildren { get; }
 
-    public NavTree WithoutHiddenNodes() => new(FilterChildrenBy(Root, node => node.Order >= 0), HasHiddenNodes);
+    public NavTree WithoutHiddenNodes() => new(FilterChildrenBy(Root, node => node.Order >= 0), ContainsUnauthorizedChildren);
 
-    public NavTree WithoutChildlessContentlessNodes() => new(FilterChildrenBy(Root, node => node.Children != null || node.HasContent), HasHiddenNodes);
+    public NavTree WithoutChildlessContentlessNodes() => new(FilterChildrenBy(Root, node => node.Children != null || node.HasContent), ContainsUnauthorizedChildren);
 
     public NavTree FilterByGroups(IEnumerable<string> groups)
     {
@@ -85,7 +85,7 @@ public class NavTree
                 var newNode = kvp.Value.Clone();
                 newNode.Children = children is { Count: > 0 } ? children : null;
                 newNode.HasContent = hasContent;
-                newNode.HasHiddenChildren = childExcluded;
+                newNode.ContainsUnauthorizedChildren = childExcluded;
 
                 return new(
                     kvp.Key,
