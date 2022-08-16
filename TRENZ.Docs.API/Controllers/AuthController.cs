@@ -40,11 +40,11 @@ public class AuthController : ControllerBase
 
         callbackUrlBuilder.Path = Url.Action("Callback", "Auth");
 
+        var branding = _configuration.GetSection("Branding")?.Get<BrandingInformation?>();
         var request = new AuthenticateRequest(
             returnUrl,
             callbackUrlBuilder.ToString(),
-            _configuration["Branding:Color"],
-            _configuration["Branding:Image"]
+            branding
         );
 
         return await _authAdapter.RedirectToSignInPageAsync(request, cancellationToken);

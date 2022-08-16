@@ -32,8 +32,8 @@ public class JwtCookieAuthAdapter : IAuthAdapter
             {
                 { "returnUrl", request.ReturnUrl },
                 { "callbackUrl", request.CallbackUrl },
-                { "brandingColor", request.BrandingColor },
-                { "brandingImageUrl", request.BrandingImageUrl },
+                { "branding.color", request.Branding?.Color },
+                { "branding.image", request.Branding?.Image },
                 { "clientId", ClientId },
             },
             ClientSecret
