@@ -6,6 +6,14 @@ using TRENZ.Docs.API.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLogging(c =>
+{
+    c.AddSimpleConsole(sc =>
+    {
+        sc.SingleLine = true;
+    });
+});
+
 builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
