@@ -14,7 +14,7 @@ public class NavNodeFlaggingServiceTest
         yield return new object[]
         {
             new Dictionary<string, NavNode> { { "root", new("root") } },
-            new List<ISourceFile> { new MemorySourceFile("uid", "root", "root.md", "root content", "root") },
+            new List<ISourceFile> { new MemorySourceFile("root.md", "root content") },
             new Dictionary<string, NavNode> { { "root", new("root") { HasContent = true } } },
         };
 

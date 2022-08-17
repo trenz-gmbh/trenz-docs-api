@@ -7,9 +7,6 @@ namespace TRENZ.Docs.API.Test.Models.Sources;
 public class MemorySourceFile : ISourceFile
 {
     /// <inheritdoc />
-    public string Uid { get; }
-
-    /// <inheritdoc />
     public string Name { get; }
 
     /// <inheritdoc />
@@ -19,13 +16,23 @@ public class MemorySourceFile : ISourceFile
     public string Location { get; }
 
     private readonly string _contents;
-    
-    public MemorySourceFile(string uid, string name, string relativePath, string contents, string? location = null)
+
+    /// <summary>
+    /// Creates an <see cref="ISourceFile"/> with the contents residing in memory
+    /// </summary>
+    /// <param name="name">The <see cref="RelativePath"/> converted to a display-friendly, normalized format (i.e. using
+    /// <see cref="NavNode.PathToLocation"/>).</param>
+    /// <param name="relativePath">The relative path from a <see cref="ISource"/> path to the file including file
+    /// extensions. Contains platform specific separators.</param>
+    /// <param name="contents">The contents to return when <see cref="GetBytesAsync"/>, <see cref="GetTextAsync"/> or
+    /// <see cref="GetLinesAsync"/> is called.</param>
+    /// <param name="location">Optionally override the location, this is normally derived from the
+    /// <see cref="RelativePath"/> using <see cref="NavNode.PathToLocation"/></param>
+    public MemorySourceFile(string relativePath, string contents, string? name = null, string? location = null)
     {
-        Uid = uid;
-        Name = name;
-        Location = location ?? NavNode.PathToLocation(relativePath);
         RelativePath = relativePath;
+        Location = location ?? NavNode.PathToLocation(string.Join('.', RelativePath.Split('.').SkipLast(1)));
+        Name = name ?? Location.Split(NavNode.Separator).Last();
         _contents = contents;
     }
 

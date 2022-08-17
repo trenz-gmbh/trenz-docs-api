@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using Markdig;
@@ -13,13 +14,15 @@ namespace TRENZ.Docs.API.Services;
 
 public class MarkdownFileProcessingService : IFileProcessingService
 {
+    private static string ToMd5(string text) => Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(text)));
+
     private readonly ILogger<MarkdownFileProcessingService> _logger;
     
     public MarkdownFileProcessingService(ILogger<MarkdownFileProcessingService> logger)
     {
         _logger = logger;
     }
-    
+
     /// <inheritdoc />
     public async IAsyncEnumerable<IndexFile> ProcessAsync(IEnumerable<ISourceFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -62,7 +65,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 renderer.Render(document);
 
                 yield return new(
-                    f.Uid,
+                    ToMd5(f.Location),
                     f.Name,
                     builder.ToString(),
                     f.Location
