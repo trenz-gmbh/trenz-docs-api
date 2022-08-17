@@ -55,7 +55,14 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 var content = await f.GetTextAsync(cancellationToken);
                 var document = Markdown.Parse(content, markdownPipeline);
 
-                RewriteLinks(f, document);
+                foreach (var child in document.Descendants())
+                {
+                    if (child is not LinkInline link)
+                        continue;
+
+                    link.Url = RewriteLinks(link.Url, link.IsImage, f.RelativePath);
+                    if (link.Reference != null) link.Reference.Url = null;
+                }
 
                 var builder = new StringBuilder();
                 var writer = new StringWriter(builder);
@@ -71,39 +78,21 @@ public class MarkdownFileProcessingService : IFileProcessingService
             }
     }
 
-    private static void RewriteLinks(ISourceFile file, MarkdownObject markdownObject)
+    public static string? RewriteLinks(string? original, bool isImage, string relativePath)
     {
-        foreach (var child in markdownObject.Descendants())
-        {
-            if (child is not LinkInline link)
-                continue;
+        var path = HttpUtility.UrlDecode(original ?? "");
+        if (isImage)
+            return RewriteImageLink(path, relativePath);
 
-            var path = HttpUtility.UrlDecode(link.Url ?? "");
-            if (link.IsImage)
-            {
-                path = RewriteImageLink(path, file);
-            }
-            else
-            {
-                if (Uri.TryCreate(path, UriKind.Absolute, out _))
-                {
-                    continue;
-                }
-
-                path = RewriteLink(path);
-            }
-
-            link.Url = path;
-            if (link.Reference != null) link.Reference.Url = null;
-        }
+        return Uri.TryCreate(path, UriKind.Absolute, out _) ? original : RewriteInlineLink(path);
     }
 
-    private static string RewriteImageLink(string? orignalUrl, ISourceFile file)
+    private static string RewriteImageLink(string? decodedUrl, string relativePath)
     {
-        var parent = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
+        var parent = string.Join('/', relativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
         parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
 
-        var location = parent + orignalUrl;
+        var location = parent + decodedUrl;
         if (location.StartsWith("."))
         {
             // only encoding when necessary to get cleaner URLs by default
@@ -113,9 +102,9 @@ public class MarkdownFileProcessingService : IFileProcessingService
         return $"%API_HOST%/File/{location}";
     }
 
-    private static string RewriteLink(string originalUrl)
+    private static string RewriteInlineLink(string decodedUrl)
     {
-        var location = NavNode.PathToLocation(originalUrl.EndsWith(".md") ? originalUrl[..^3] : originalUrl);
+        var location = NavNode.PathToLocation(decodedUrl.EndsWith(".md") ? decodedUrl[..^3] : decodedUrl);
 
         return HttpUtility.UrlPathEncode(location);
     }

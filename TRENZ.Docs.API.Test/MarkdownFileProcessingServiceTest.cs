@@ -53,4 +53,20 @@ public class MarkdownFileProcessingServiceTest
             Assert.AreEqual(expected.location, output.location);
         }
     }
+
+    public static IEnumerable<object[]> RewriteLinksValuesProvider()
+    {
+        yield return new object[] { "./test.md", false, "test.md", "./test" };
+        yield return new object[] { "assets/image.png", true, "nested/document.md", "%API_HOST%/File/assets/image.png" };
+        yield return new object[] { "../another_image.png", true, "nested/document.md", "%API_HOST%/File/..%2fanother_image.png" };
+    }
+
+    [DataTestMethod]
+    [DynamicData(nameof(RewriteLinksValuesProvider), DynamicDataSourceType.Method)]
+    public void TestRewriteLinks(string? original, bool isImage, string relativePath, string? expected)
+    {
+        var rewritten = MarkdownFileProcessingService.RewriteLinks(original, isImage, relativePath);
+
+        Assert.AreEqual(expected, rewritten);
+    }
 }
