@@ -34,8 +34,8 @@ public class NavNodeFlaggingServiceTest
             },
             new List<ISourceFile>
             {
-                new MemorySourceFile("uid", "root", "root.md", "root content", "root"),
-                new MemorySourceFile("uid2", "nested", Path.Combine("root", "nested.md"), "nested content", "root/nested"),
+                new MemorySourceFile( "root.md", "root content"),
+                new MemorySourceFile(Path.Combine("root", "nested.md"), "nested content"),
             },
             new Dictionary<string, NavNode>
             {
@@ -52,6 +52,72 @@ public class NavNodeFlaggingServiceTest
                                 }
                             },
                         },
+                    }
+                },
+            },
+        };
+
+        yield return new object[]
+        {
+            new Dictionary<string, NavNode>
+            {
+                {
+                    "hyphen-no-content",
+                    new("hyphen-no-content")
+                },
+                {
+                    "hyphen-with-content",
+                    new("hyphen-with-content")
+                },
+            },
+            new List<ISourceFile>
+            {
+                new MemorySourceFile("hyphen%2Dwith%2Dcontent.md", "I am content"),
+            },
+            new Dictionary<string, NavNode>
+            {
+                {
+                    "hyphen-no-content",
+                    new("hyphen-no-content")
+                },
+                {
+                    "hyphen-with-content",
+                    new("hyphen-with-content")
+                    {
+                        HasContent = true,
+                    }
+                },
+            },
+        };
+
+        yield return new object[]
+        {
+            new Dictionary<string, NavNode>
+            {
+                {
+                    "space no content",
+                    new("space no content")
+                },
+                {
+                    "space with content",
+                    new("space with content")
+                },
+            },
+            new List<ISourceFile>
+            {
+                new MemorySourceFile("space-with-content.md", "I am content"),
+            },
+            new Dictionary<string, NavNode>
+            {
+                {
+                    "space no content",
+                    new("space no content")
+                },
+                {
+                    "space with content",
+                    new("space with content")
+                    {
+                        HasContent = true,
                     }
                 },
             },
