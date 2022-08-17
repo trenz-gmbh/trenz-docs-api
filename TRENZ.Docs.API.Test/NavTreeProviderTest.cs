@@ -17,15 +17,19 @@ public class NavTreeProviderTest
         {
             new List<ISourceFile>
             {
-                new MemorySourceFile("node1", "node1 content"),
-                new MemorySourceFile("node2", "node2 content"),
-                new MemorySourceFile("node3", "node3 content"),
+                new MemorySourceFile("node1.md", "node1 content"),
+                new MemorySourceFile("node2.md", "node2 content"),
+                new MemorySourceFile("node3.md", "node3 content"),
+                new MemorySourceFile("spaced-out.md", "name contains spaces content"),
+                new MemorySourceFile("hy%2Dphened.md", "name contains hyphens content"),
             },
             new Dictionary<string, NavNode>
             {
                 { "node1", new("node1") },
                 { "node2", new("node2") },
                 { "node3", new("node3") },
+                { "spaced out", new("spaced out") },
+                { "hy-phened", new("hy-phened") },
             },
         };
 
@@ -33,8 +37,8 @@ public class NavTreeProviderTest
         {
             new List<ISourceFile>
             {
-                new MemorySourceFile("node1", "node1 content"),
-                new MemorySourceFile(Path.Combine("nested", "in", "tree", "node2"), "node2 content"),
+                new MemorySourceFile("node1.md", "node1 content"),
+                new MemorySourceFile(Path.Combine("nested", "in", "tree", "node2.md"), "node2 content"),
             },
             new Dictionary<string, NavNode>
             {
