@@ -34,7 +34,7 @@ public class NavNodeFlaggingServiceTest
             },
             new List<ISourceFile>
             {
-                new MemorySourceFile( "root.md", "root content"),
+                new MemorySourceFile("root.md", "root content"),
                 new MemorySourceFile(Path.Combine("root", "nested.md"), "nested content"),
             },
             new Dictionary<string, NavNode>
