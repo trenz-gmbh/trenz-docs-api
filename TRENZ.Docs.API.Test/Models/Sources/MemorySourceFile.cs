@@ -20,11 +20,11 @@ public class MemorySourceFile : ISourceFile
 
     private readonly string _contents;
     
-    public MemorySourceFile(string uid, string name, string relativePath, string contents)
+    public MemorySourceFile(string uid, string name, string relativePath, string contents, string? location = null)
     {
         Uid = uid;
         Name = name;
-        Location = NavNode.PathToLocation(relativePath);
+        Location = location ?? NavNode.PathToLocation(relativePath);
         RelativePath = relativePath;
         _contents = contents;
     }

@@ -6,7 +6,6 @@ using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using TRENZ.Docs.API.Interfaces;
-using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Index;
 using TRENZ.Docs.API.Models.Sources;
 
@@ -22,7 +21,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
     }
     
     /// <inheritdoc />
-    public async IAsyncEnumerable<IndexFile> ProcessAsync(IAsyncEnumerable<ISourceFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<IndexFile> ProcessAsync(IEnumerable<ISourceFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
             var markdownPipeline = new MarkdownPipelineBuilder()
                 // .UseAbbreviations()
@@ -48,7 +47,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 // .UseGenericAttributes()
                 .Build();
 
-            await foreach (var f in files.WithCancellation(cancellationToken))
+            foreach (var f in files)
             {
                 _logger.LogInformation("Processing {File}", f.RelativePath);
 

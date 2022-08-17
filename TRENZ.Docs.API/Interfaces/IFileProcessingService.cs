@@ -5,5 +5,5 @@ namespace TRENZ.Docs.API.Interfaces;
 
 public interface IFileProcessingService
 {
-    IAsyncEnumerable<IndexFile> ProcessAsync(IAsyncEnumerable<ISourceFile> files, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IndexFile> ProcessAsync(IEnumerable<ISourceFile> files, CancellationToken cancellationToken = default);
 }

@@ -43,7 +43,7 @@ public class MarkdownFileProcessingServiceTest
     {
         var logger = TestHelper.GetLogger<MarkdownFileProcessingService>();
         var service = new MarkdownFileProcessingService(logger);
-        var indexFiles = await service.ProcessAsync(sourceFiles.ToAsyncEnumerable()).ToListAsync();
+        var indexFiles = await service.ProcessAsync(sourceFiles).ToListAsync();
 
         foreach (var (expected, output) in expectedFiles.Zip(indexFiles))
         {

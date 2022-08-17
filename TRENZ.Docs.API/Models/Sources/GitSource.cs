@@ -17,12 +17,12 @@ public class GitSource : AbstractFilesystemSource
     public string? Username => _configuration["Username"];
     public string? Password => _configuration["Password"];
 
-    public GitSource(IConfiguration configuration, ILoggerFactory loggerFactory)
+    public GitSource(IConfiguration configuration, ILogger<GitSource> logger)
     {
         _configuration = configuration;
-        _logger = loggerFactory.CreateLogger<GitSource>();
+        _logger = logger;
     }
-    
+
     /// <inheritdoc />
     public override Task UpdateAsync(CancellationToken cancellationToken = default)
     {

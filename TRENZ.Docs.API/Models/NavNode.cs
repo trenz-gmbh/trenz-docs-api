@@ -13,16 +13,22 @@ public class NavNode
     public const char Separator = '/';
 
     /// <summary>
+    /// The permission to read the content of a node.
+    /// </summary>
+    public const string PermissionRead = "read";
+
+    /// <summary>
+    /// The permission to list the children of a node.
+    /// </summary>
+    public const string PermissionList = "list";
+
+    /// <summary>
     /// Represents a node within a navigation tree. Can have children.
     /// </summary>
     /// <param name="location">The location of the node in the tree.</param>
-    /// <param name="hasContent">Whether or not this node has a corresponding content file.</param>
-    /// <param name="children">A dictionary of child nodes, keyed by the child's node name.</param>
-    public NavNode(string location, bool hasContent = false, Dictionary<string, NavNode>? children = null)
+    public NavNode(string location)
     {
         Location = location;
-        HasContent = hasContent;
-        Children = children;
     }
 
     /// <summary>
@@ -49,6 +55,11 @@ public class NavNode
     public bool HasContent { get; set; }
 
     /// <summary>
+    /// Whether or not this node contains children which were filtered out due to permissions.
+    /// </summary>
+    public bool ContainsUnauthorizedChildren { get; set; }
+
+    /// <summary>
     /// The display name of the node in the tree. This is the last part of <see cref="Location" />.
     /// </summary>
     public string NodeName => LocationParts.Last();
@@ -66,6 +77,31 @@ public class NavNode
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dictionary<string, NavNode>? Children { get; set; }
+
+    /// <summary>
+    /// Contains a dictionary keyed by the group name whose values is an array of permissions of this group for this
+    /// node. Child nodes have their own set of group permissions.
+    /// Is ignored during JSON serialization.
+    /// </summary>
+    [JsonIgnore]
+    public Dictionary<string, string[]> Groups { get; set; } = new();
+
+    /// <summary>
+    /// Creates a new instance of a <see cref="NavNode" /> with the same properties as this one.
+    /// Also clones all child nodes recursively.
+    /// </summary>
+    /// <returns>A new nav node without any references to this node.</returns>
+    public NavNode Clone()
+    {
+        return new(Location)
+        {
+            Order = Order,
+            HasContent = HasContent,
+            ContainsUnauthorizedChildren = ContainsUnauthorizedChildren,
+            Groups = Groups.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray()),
+            Children = Children?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Clone()),
+        };
+    }
 
     /// <summary>
     /// Converts a physical file path to a location in the tree.

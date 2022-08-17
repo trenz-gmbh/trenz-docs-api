@@ -23,7 +23,7 @@ public class ConfigurationSourcesProvider : ISourcesProvider
             .Where(s => s["Type"] != null)
             .Select<IConfigurationSection, ISource>(s => s["Type"] switch
             {
-                "git" => new GitSource(s, _loggerFactory),
+                "git" => new GitSource(s, _loggerFactory.CreateLogger<GitSource>()),
                 "local" => LocalSource.FromConfiguration(s),
                 _ => throw new NotImplementedException($"The source type '{s["Type"]}' is not implemented. Must be one of: 'git', 'local'"),
             });

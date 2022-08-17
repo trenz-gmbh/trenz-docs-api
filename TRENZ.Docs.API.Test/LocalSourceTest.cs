@@ -73,20 +73,20 @@ public class LocalSourceTest
 
     public static IEnumerable<object[]> FindFilesValuesProvider()
     {
-        var source = new LocalSource("Test", Path.Combine(Environment.CurrentDirectory, "Data"));
+        var source = new LocalSource("Test", "./Data");
 
         yield return new object[]
         {
             ".*\\.md$",
             source,
-            new[] { "Image.md", "Test.md", "Nested" + Path.DirectorySeparatorChar + "Text.md" },
+            new[] { "Image.md", "Test.md", Path.Combine("Nested", "Text.md") },
         };
 
         yield return new object[]
         {
             "\\.order",
             source,
-            new[] { ".order", "Nested" + Path.DirectorySeparatorChar + ".order" },
+            new[] { ".order", Path.Combine("Nested", ".order") },
         };
     }
 
@@ -96,6 +96,6 @@ public class LocalSourceTest
     {
         var files = source.FindFiles(new(pattern)).Select(sf => sf.RelativePath);
 
-        Assert.IsTrue(relativePaths.SequenceEqual(files));
+        CollectionAssert.AreEquivalent(relativePaths.ToArray(), files.ToArray());
     }
 }

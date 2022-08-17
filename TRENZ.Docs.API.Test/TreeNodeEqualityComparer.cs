@@ -16,6 +16,12 @@ internal class TreeNodeEqualityComparer : IEqualityComparer<KeyValuePair<string,
         if (x.Value.Order != y.Value.Order)
             return false;
 
+        if (x.Value.ContainsUnauthorizedChildren != y.Value.ContainsUnauthorizedChildren)
+            return false;
+
+        if (!x.Value.Groups.SequenceEqual(y.Value.Groups))
+            return false;
+
         return x.Value.HasContent == y.Value.HasContent;
     }
 

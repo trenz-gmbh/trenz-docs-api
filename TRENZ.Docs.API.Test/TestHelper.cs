@@ -63,10 +63,38 @@ public static class TestHelper
             if (!comparer.Equals(aItem, bItem))
                 return false;
 
-            if (!DeepSequenceEquals(childSelector(aItem), childSelector(bItem), childSelector, comparer))
+            if (!childSelector(aItem).DeepSequenceEquals(childSelector(bItem), childSelector, comparer))
                 return false;
         }
 
         return true;
+    }
+
+    public static void ForEachDeep<T>(this IEnumerable<T>? a, IEnumerable<T>? b, Action<T, T> action, Func<T, IEnumerable<T>?> childSelector)
+    {
+        if (a is null && b is null)
+            return;
+
+        if (a is null)
+            throw new ArgumentNullException(nameof(a));
+
+        if (b is null)
+            throw new ArgumentNullException(nameof(b));
+
+        var aList = a.ToList();
+        var bList = b.ToList();
+
+        if (aList.Count != bList.Count)
+            throw new ArgumentException("Lists are not of equal length");
+
+        for (var i = 0; i < aList.Count; i++)
+        {
+            var aItem = aList[i];
+            var bItem = bList[i];
+
+            action(aItem, bItem);
+
+            childSelector(aItem).ForEachDeep(childSelector(bItem), action, childSelector);
+        }
     }
 }
