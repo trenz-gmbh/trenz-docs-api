@@ -30,7 +30,7 @@ public class MarkdownFileProcessingServiceTest
                 new IndexFile(
                     "AC3AEF213ACC355D71D9E3A708283052",
                     "Image",
-                    "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/..%2frelative.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
+                    "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
                     "Image"
                 ),
             },
@@ -58,7 +58,7 @@ public class MarkdownFileProcessingServiceTest
     {
         yield return new object[] { "./test.md", false, "test.md", "./test" };
         yield return new object[] { "assets/image.png", true, "nested/document.md", "%API_HOST%/File/nested/assets/image.png" };
-        yield return new object[] { "../another_image.png", true, "nested/document.md", "%API_HOST%/File/..%2fanother_image.png" };
+        yield return new object[] { "../another_image.png", true, "nested/document.md", "%API_HOST%/File/another_image.png" };
     }
 
     [DataTestMethod]
