@@ -96,7 +96,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
         if (location.StartsWith("."))
         {
             // only encoding when necessary to get cleaner URLs by default
-            location = HttpUtility.UrlEncode(location);
+            location = HttpUtility.UrlPathEncode(location);
         }
 
         return $"%API_HOST%/File/{location}";
