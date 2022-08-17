@@ -44,8 +44,9 @@ public class MeilisearchIndexingService : IIndexingService
         var filesIndex = GetIndex();
         foreach (var task in new Dictionary<string, Task<TaskInfo>>
                  {
-                     { "Delete previous index", filesIndex.DeleteAllDocumentsAsync(cancellationToken) },
-                     { "Add new index", filesIndex.AddDocumentsAsync(files, cancellationToken: cancellationToken) },
+                     { "Delete previous index", _client.DeleteIndexAsync(filesIndex.Uid, cancellationToken) },
+                     { "Create new index", _client.CreateIndexAsync(filesIndex.Uid, nameof(IndexFile.uid), cancellationToken) },
+                     { "Add files to index", filesIndex.AddDocumentsAsync(files, cancellationToken: cancellationToken) },
                      { "Update index settings", filesIndex.UpdateSettingsAsync(settings, cancellationToken) },
                  })
         {
