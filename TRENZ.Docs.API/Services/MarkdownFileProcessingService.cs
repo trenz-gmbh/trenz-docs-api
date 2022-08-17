@@ -6,6 +6,7 @@ using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using TRENZ.Docs.API.Interfaces;
+using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Index;
 using TRENZ.Docs.API.Models.Sources;
 
@@ -54,8 +55,15 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 var content = await f.GetTextAsync(cancellationToken);
                 var document = Markdown.Parse(content, markdownPipeline);
 
-                UpdateImageLinks(f, document);
-                
+                foreach (var child in document.Descendants())
+                {
+                    if (child is not LinkInline link)
+                        continue;
+
+                    link.Url = RewriteLinks(link.Url, link.IsImage, f.RelativePath);
+                    if (link.Reference != null) link.Reference.Url = null;
+                }
+
                 var builder = new StringBuilder();
                 var writer = new StringWriter(builder);
                 var renderer = new NormalizeRenderer(writer);
@@ -70,24 +78,54 @@ public class MarkdownFileProcessingService : IFileProcessingService
             }
     }
 
-    private static void UpdateImageLinks(ISourceFile file, MarkdownObject markdownObject)
+    public static string? RewriteLinks(string? original, bool isImage, string relativePath)
     {
-        foreach (var child in markdownObject.Descendants())
+        var path = HttpUtility.UrlDecode(original ?? "");
+        if (isImage)
+            return RewriteImageLink(path, relativePath);
+
+        return Uri.TryCreate(path, UriKind.Absolute, out _) ? original : RewriteInlineLink(path);
+    }
+
+    private static string RewriteImageLink(string? decodedUrl, string relativePath)
+    {
+        var parent = string.Join('/', relativePath.Split('/').SkipLast(1));
+        parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
+
+        var location = parent + decodedUrl;
+        while (location.StartsWith("./"))
+            location = location[2..];
+
+        if (location.Contains(".."))
         {
-            if (child is not LinkInline { IsImage: true } link) continue;
-
-            var parent = string.Join('/', file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
-            parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
-
-            var location = parent + link.Url;
-            if (location.StartsWith("."))
+            var parts = location.Split('/');
+            var newParts = new List<string>();
+            foreach (var part in parts)
             {
-                // only encoding when necessary to get cleaner URLs by default
-                location = HttpUtility.UrlEncode(location);
+                if (part == "..")
+                {
+                    if (newParts.Count - 1 >= 0)
+                        newParts.RemoveAt(newParts.Count - 1);
+                    else
+                        newParts.Add(part);
+                }
+                else
+                    newParts.Add(part);
             }
 
-            link.Url = $"%API_HOST%/File/{location}";
-            if (link.Reference != null) link.Reference.Url = null;
+            location = string.Join('/', newParts);
         }
+
+        if (location.StartsWith("."))
+            throw new ArgumentException("Cannot resolve relative paths outside of source paths.");
+
+        return $"%API_HOST%/File/{location}";
+    }
+
+    private static string RewriteInlineLink(string decodedUrl)
+    {
+        var location = NavNode.PathToLocation(decodedUrl.EndsWith(".md") ? decodedUrl[..^3] : decodedUrl);
+
+        return HttpUtility.UrlPathEncode(location);
     }
 }
