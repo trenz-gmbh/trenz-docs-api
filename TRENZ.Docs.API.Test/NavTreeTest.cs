@@ -34,6 +34,7 @@ public class NavTreeTest
         );
     }
 
+    [TestMethod]
     public void TestWithoutHiddenNodes_Nested()
     {
         var tree = new NavTree(new()
