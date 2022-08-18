@@ -70,9 +70,9 @@ public static class TestHelper
     {
         Assert.AreEqual(x.Key, y.Key);
         Assert.AreEqual(x.Value.Location, y.Value.Location);
-        Assert.AreEqual(x.Value.Order, y.Value.Order);
-        Assert.AreEqual(x.Value.ContainsUnauthorizedChildren, y.Value.ContainsUnauthorizedChildren);
-        Assert.AreEqual(x.Value.HasContent, y.Value.HasContent);
+        Assert.AreEqual(x.Value.Order, y.Value.Order, $"Order differs at {x.Value.Location}");
+        Assert.AreEqual(x.Value.ContainsUnauthorizedChildren, y.Value.ContainsUnauthorizedChildren, $"ContainsUnauthorizedChildren differs at {x.Value.Location}");
+        Assert.AreEqual(x.Value.HasContent, y.Value.HasContent, $"HasContent differs at {x.Value.Location}");
         CollectionAssert.AreEqual(x.Value.Groups, y.Value.Groups);
     }
 
