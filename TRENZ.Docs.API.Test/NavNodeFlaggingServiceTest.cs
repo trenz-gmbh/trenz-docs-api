@@ -133,12 +133,10 @@ public class NavNodeFlaggingServiceTest
 
         await service.UpdateHasContentFlagAsync(tree, files);
 
-        Assert.IsTrue(
-            tree.DeepSequenceEquals(
-                expectedTree,
-                n => n.Value.Children,
-                new TreeNodeEqualityComparer()
-            )
+        tree.AssertDeepSequenceEquals(
+            expectedTree,
+            n => n.Value.Children,
+            TestHelper.AssertNavNodesAreEqual
         );
     }
 }

@@ -86,12 +86,10 @@ public class NavTreeProviderTest
         var service = new NavTreeProvider(nodeFlaggerMock.Object, nodeOrderingMock.Object, nodeAuthorizationMock.Object);
         var tree = await service.RebuildAsync(indexFiles);
 
-        Assert.IsTrue(
-            tree.Root.DeepSequenceEquals(
-                expectedTree,
-                n => n.Value.Children,
-                new TreeNodeEqualityComparer()
-            )
+        tree.Root.AssertDeepSequenceEquals(
+            expectedTree,
+            n => n.Value.Children,
+            TestHelper.AssertNavNodesAreEqual
         );
     }
 }

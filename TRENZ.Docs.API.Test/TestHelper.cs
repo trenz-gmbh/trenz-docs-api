@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TRENZ.Docs.API.Interfaces;
+using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Sources;
 using TRENZ.Docs.API.Test.Models.Sources;
 using TRENZ.Docs.API.Test.Services;
@@ -39,35 +40,40 @@ public static class TestHelper
         return new MemorySourcesProvider(new[] { source });
     }
 
-    public static bool DeepSequenceEquals<T>(this IEnumerable<T>? a, IEnumerable<T>? b, Func<T, IEnumerable<T>?> childSelector, IEqualityComparer<T>? comparer = null)
+    public static void AssertDeepSequenceEquals<T>(this IEnumerable<T>? a, IEnumerable<T>? b, Func<T, IEnumerable<T>?> childSelector, Action<T, T>? assertion)
     {
-        comparer ??= EqualityComparer<T>.Default;
+        assertion ??= Assert.AreEqual;
 
         if (a is null && b is null)
-            return true;
+            return;
 
-        if (a is null || b is null)
-            return false;
+        Assert.IsNotNull(a);
+        Assert.IsNotNull(b);
 
         var aList = a.ToList();
         var bList = b.ToList();
 
-        if (aList.Count != bList.Count)
-            return false;
+        Assert.AreEqual(aList.Count, bList.Count);
 
         for (var i = 0; i < aList.Count; i++)
         {
             var aItem = aList[i];
             var bItem = bList[i];
 
-            if (!comparer.Equals(aItem, bItem))
-                return false;
+            assertion(aItem, bItem);
 
-            if (!childSelector(aItem).DeepSequenceEquals(childSelector(bItem), childSelector, comparer))
-                return false;
+            childSelector(aItem).AssertDeepSequenceEquals(childSelector(bItem), childSelector, assertion);
         }
+    }
 
-        return true;
+    public static void AssertNavNodesAreEqual(KeyValuePair<string, NavNode> x, KeyValuePair<string, NavNode> y)
+    {
+        Assert.AreEqual(x.Key, y.Key);
+        Assert.AreEqual(x.Value.Location, y.Value.Location);
+        Assert.AreEqual(x.Value.Order, y.Value.Order);
+        Assert.AreEqual(x.Value.ContainsUnauthorizedChildren, y.Value.ContainsUnauthorizedChildren);
+        Assert.AreEqual(x.Value.HasContent, y.Value.HasContent);
+        CollectionAssert.AreEqual(x.Value.Groups, y.Value.Groups);
     }
 
     public static void ForEachDeep<T>(this IEnumerable<T>? a, IEnumerable<T>? b, Action<T, T> action, Func<T, IEnumerable<T>?> childSelector)
