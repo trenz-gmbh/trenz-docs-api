@@ -38,8 +38,15 @@ public class NavTree
             Root,
             node => HasPermissionFor(node, NavNode.PermissionList, NavNode.PermissionRead),
             node => HasPermissionFor(node, NavNode.PermissionRead),
-            node => HasPermissionFor(node, NavNode.PermissionList),
-            () => childExcluded = true
+            node =>
+            {
+                var include = HasPermissionFor(node, NavNode.PermissionList);
+                if (!include)
+                    node.ContainsUnauthorizedChildren = true;
+
+                return include;
+            },
+            node => childExcluded = childExcluded || (!node.HasContent && node.Children == null)
         );
 
         return new(newRoot, childExcluded);
@@ -50,7 +57,7 @@ public class NavTree
         Func<NavNode, bool> includeNode,
         Func<NavNode, bool>? includeContent = null,
         Func<NavNode, bool>? includeChildren = null,
-        Action? onNodeExcluded = null
+        Action<NavNode>? onNodeExcluded = null
     )
     {
         includeContent ??= _ => true;
@@ -63,21 +70,19 @@ public class NavTree
                     return kvp;
 
                 Dictionary<string, NavNode>? children = null;
-                var childExcluded = false;
                 if (includeChildren(kvp.Value))
-                    children = FilterChildrenBy(kvp.Value.Children, includeNode, includeContent, includeChildren, () => childExcluded = true);
+                    children = FilterChildrenBy(kvp.Value.Children, includeNode, includeContent, includeChildren, onNodeExcluded);
 
                 var hasContent = kvp.Value.HasContent;
                 if (includeContent(kvp.Value))
                 {
                     hasContent = false;
-                    onNodeExcluded?.Invoke();
+                    onNodeExcluded?.Invoke(kvp.Value);
                 }
 
                 var newNode = kvp.Value.Clone();
                 newNode.Children = children is { Count: > 0 } ? children : null;
                 newNode.HasContent = hasContent;
-                newNode.ContainsUnauthorizedChildren = childExcluded;
 
                 return new(
                     kvp.Key,
@@ -88,7 +93,7 @@ public class NavTree
             {
                 var include = includeNode(kvp.Value);
                 if (!include)
-                    onNodeExcluded?.Invoke();
+                    onNodeExcluded?.Invoke(kvp.Value);
 
                 return include;
             })
