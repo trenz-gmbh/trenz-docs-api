@@ -9,7 +9,7 @@ public class PhysicalSourceFile : ISourceFile
     {
         Source = source;
         RelativePath = relativePath;
-        Location = NavNode.PathToLocation(string.Join('.', RelativePath.Split('.').SkipLast(1)));
+        Location = NavNode.PathToLocation(RelativePath.EndsWith(".md") ? RelativePath[..^3] : RelativePath);
         Name = Location.Split(NavNode.Separator).Last();
         AbsolutePhysicalPath = Path.Combine(Source.Root, Source.Path, RelativePath);
     }
