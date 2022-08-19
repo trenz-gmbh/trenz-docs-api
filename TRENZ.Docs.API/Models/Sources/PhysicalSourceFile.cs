@@ -5,15 +5,11 @@ namespace TRENZ.Docs.API.Models.Sources;
 
 public class PhysicalSourceFile : ISourceFile
 {
-    private const char UidSeparator = '#';
-    private static string ToMd5(string text) => Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(text)));
-
     public PhysicalSourceFile(ISource source, string relativePath)
     {
         Source = source;
         RelativePath = relativePath;
-        Uid = ToMd5(Source.Name + UidSeparator + RelativePath);
-        Location = NavNode.PathToLocation(string.Join('.', RelativePath.Split('.').SkipLast(1)));
+        Location = NavNode.PathToLocation(RelativePath.EndsWith(".md") ? RelativePath[..^3] : RelativePath);
         Name = Location.Split(NavNode.Separator).Last();
         AbsolutePhysicalPath = Path.Combine(Source.Root, Source.Path, RelativePath);
     }
@@ -29,9 +25,6 @@ public class PhysicalSourceFile : ISourceFile
 
     /// <inheritdoc />
     public string Name { get; }
-
-    /// <inheritdoc />
-    public string Uid { get; }
 
     /// <inheritdoc />
     public async Task<byte[]> GetBytesAsync(CancellationToken cancellationToken = default) => await File.ReadAllBytesAsync(AbsolutePhysicalPath, cancellationToken);

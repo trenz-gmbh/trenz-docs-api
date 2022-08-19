@@ -13,10 +13,10 @@ public class NavNodeOrderingServiceTest
     {
         var sources = TestHelper.ProvideFiles(new[]
         {
-            new MemorySourceFile("uid1","End", "End", "I'm at the end"),
-            new MemorySourceFile("uid2","Start", "Start", "I'm at the start"),
-            new MemorySourceFile("uid3","Middle", "Middle", "I'm in the middle"),
-            new MemorySourceFile("uid4","Hidden", "Hidden", "I'm hidden"),
+            new MemorySourceFile("End", "I'm at the end"),
+            new MemorySourceFile("Start", "I'm at the start"),
+            new MemorySourceFile("Middle", "I'm in the middle"),
+            new MemorySourceFile("Hidden", "I'm hidden"),
         });
         var logger = TestHelper.GetLogger<NavNodeOrderingService>();
         var service = new NavNodeOrderingService(sources, logger);
@@ -44,11 +44,11 @@ public class NavNodeOrderingServiceTest
     {
         var sources = TestHelper.ProvideFiles(new[]
         {
-            new MemorySourceFile("uid1","End", "End", "I'm at the end"),
-            new MemorySourceFile("uid2","Start", "Start", "I'm at the start"),
-            new MemorySourceFile("uid3","Middle", "Middle", "I'm in the middle"),
-            new MemorySourceFile("uid4","Hidden", "Hidden", "I'm hidden"),
-            new MemorySourceFile("uid5",".order", ".order", "Start\r\nMiddle\r\nEnd"),
+            new MemorySourceFile("End", "I'm at the end"),
+            new MemorySourceFile("Start", "I'm at the start"),
+            new MemorySourceFile("Middle", "I'm in the middle"),
+            new MemorySourceFile("Hidden", "I'm hidden"),
+            new MemorySourceFile(".order", "Start\r\nMiddle\r\nEnd"),
         });
         var logger = TestHelper.GetLogger<NavNodeOrderingService>();
         var service = new NavNodeOrderingService(sources, logger);

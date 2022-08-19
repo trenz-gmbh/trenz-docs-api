@@ -24,27 +24,27 @@ public class NavTreeProvider : INavTreeProvider
 
         foreach (var file in files)
         {
-            var path = file.RelativePath.Split(Path.DirectorySeparatorChar);
-            var currentPath = new List<string>();
+            var locationParts = file.Location.Split(NavNode.Separator);
+            var currentLocation = new List<string>();
             var node = root;
-            for (var i = 0; i < path.Length; i++)
+            for (var i = 0; i < locationParts.Length; i++)
             {
-                var part = path[i];
-                if (part.EndsWith(".md"))
+                var nodeName = locationParts[i];
+                if (nodeName.EndsWith(".md"))
                 {
-                    part = part[..^3];
+                    nodeName = nodeName[..^3];
                 }
 
-                currentPath.Add(part);
+                currentLocation.Add(nodeName);
 
-                if (!node.ContainsKey(part))
+                if (!node.ContainsKey(nodeName))
                 {
-                    node[part] = new(string.Join(NavNode.Separator, currentPath));
+                    node[nodeName] = new(string.Join(NavNode.Separator, currentLocation));
                 }
 
-                if (i + 1 < path.Length)
+                if (i + 1 < locationParts.Length)
                 {
-                    node = node[part].Children ??= new();
+                    node = node[nodeName].Children ??= new();
                 }
             }
         }
