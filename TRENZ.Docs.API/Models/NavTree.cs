@@ -66,21 +66,22 @@ public class NavTree
         return subtree
             .Select(kvp =>
             {
-                if (kvp.Value.Children == null)
+                var node = kvp.Value;
+                if (node.Children == null)
                     return kvp;
 
                 Dictionary<string, NavNode>? children = null;
-                if (includeChildren(kvp.Value))
-                    children = FilterChildrenBy(kvp.Value.Children, includeNode, includeContent, includeChildren, onNodeExcluded);
+                if (includeChildren(node))
+                    children = FilterChildrenBy(node.Children, includeNode, includeContent, includeChildren, onNodeExcluded);
 
-                var hasContent = kvp.Value.HasContent;
-                if (includeContent(kvp.Value))
+                var hasContent = node.HasContent;
+                if (includeContent(node))
                 {
                     hasContent = false;
-                    onNodeExcluded?.Invoke(kvp.Value);
+                    onNodeExcluded?.Invoke(node);
                 }
 
-                var newNode = kvp.Value.Clone();
+                var newNode = node.Clone();
                 newNode.Children = children is { Count: > 0 } ? children : null;
                 newNode.HasContent = hasContent;
 
