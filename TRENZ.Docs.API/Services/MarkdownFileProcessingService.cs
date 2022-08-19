@@ -93,8 +93,6 @@ public class MarkdownFileProcessingService : IFileProcessingService
         parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
 
         var location = parent + decodedUrl;
-        while (location.StartsWith("./"))
-            location = location[2..];
 
         if (location.Contains(".."))
         {
@@ -116,6 +114,8 @@ public class MarkdownFileProcessingService : IFileProcessingService
             location = string.Join('/', newParts);
         }
 
+        location = location.Replace("./", "");
+
         if (location.StartsWith("."))
             throw new ArgumentException("Cannot resolve relative paths outside of source paths.");
 
@@ -125,7 +125,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
     private static string RewriteInlineLink(string decodedUrl)
     {
         var location = NavNode.PathToLocation(decodedUrl.EndsWith(".md") ? decodedUrl[..^3] : decodedUrl);
-
+        location = location.Replace("./", "");
         return HttpUtility.UrlPathEncode(location);
     }
 }
