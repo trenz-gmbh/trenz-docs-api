@@ -59,6 +59,7 @@ public class MarkdownFileProcessingServiceTest
         yield return new object[] { "./test.md", false, "test.md", "test" };
         yield return new object[] { "assets/image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/nested/assets/image.png" };
         yield return new object[] { "../another_image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/another_image.png" };
+        yield return new object[] { "path-with-hyphens/File%252DName.md", false, "links.md", "path%20with%20hyphens/File-Name" };
     }
 
     [DataTestMethod]
