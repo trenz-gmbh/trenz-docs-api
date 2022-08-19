@@ -63,6 +63,9 @@ public class MarkdownFileProcessingService : IFileProcessingService
                     if (child is not LinkInline link)
                         continue;
 
+                    if (link.Url == null)
+                        continue;
+
                     link.Url = RewriteLinks(link.Url, link.IsImage, f.RelativePath);
                     if (link.Reference != null) link.Reference.Url = null;
                 }
@@ -81,22 +84,34 @@ public class MarkdownFileProcessingService : IFileProcessingService
             }
     }
 
-    public static string? RewriteLinks(string? original, bool isImage, string relativePath)
-    {
-        var path = HttpUtility.UrlDecode(original ?? "");
-        if (isImage)
-            return RewriteImageLink(path, relativePath);
-
-        return Uri.TryCreate(path, UriKind.Absolute, out _) ? original : RewriteInlineLink(path);
-    }
-
-    private static string RewriteImageLink(string? decodedUrl, string relativePath)
+    public static string RewriteLinks(string original, bool isImage, string relativePath)
     {
         var parent = string.Join('/', relativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
         parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
 
-        var location = parent + decodedUrl;
+        var path = HttpUtility.UrlDecode(original ?? "");
+        var location = parent + path;
+        if (isImage)
+            return RewriteImageLink(location);
 
+        return Uri.TryCreate(path, UriKind.Absolute, out _) ? original! : RewriteInlineLink(location);
+    }
+
+    private static string RewriteImageLink(string location)
+    {
+        location = CanonicalizeUrl(location);
+        return $"%API_HOST%/File/{location}";
+    }
+
+    private static string RewriteInlineLink(string location)
+    {
+        location = NavNode.PathToLocation(location.EndsWith(".md") ? location[..^3] : location);
+        location = CanonicalizeUrl(location);
+        return HttpUtility.UrlPathEncode(location);
+    }
+
+    private static string CanonicalizeUrl(string location)
+    {
         if (location.Contains(".."))
         {
             var parts = location.Split('/');
@@ -108,7 +123,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
                     if (newParts.Count - 1 >= 0)
                         newParts.RemoveAt(newParts.Count - 1);
                     else
-                        newParts.Add(part);
+                        throw new ArgumentException("Cannot resolve relative paths outside of source paths.");
                 }
                 else
                     newParts.Add(part);
@@ -119,16 +134,6 @@ public class MarkdownFileProcessingService : IFileProcessingService
 
         location = location.Replace("./", "");
 
-        if (location.StartsWith("."))
-            throw new ArgumentException("Cannot resolve relative paths outside of source paths.");
-
-        return $"%API_HOST%/File/{location}";
-    }
-
-    private static string RewriteInlineLink(string decodedUrl)
-    {
-        var location = NavNode.PathToLocation(decodedUrl.EndsWith(".md") ? decodedUrl[..^3] : decodedUrl);
-        location = location.Replace("./", "");
-        return HttpUtility.UrlPathEncode(location);
+        return location;
     }
 }
