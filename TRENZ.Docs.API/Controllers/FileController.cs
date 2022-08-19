@@ -12,11 +12,11 @@ public class FileController : ControllerBase
     private readonly ISourcesProvider _sourcesProvider;
     private readonly INavTreeProvider _navTreeProvider;
     private readonly IAuthAdapter? _authAdapter;
-    
+
     public FileController(
         ISourcesProvider sourcesProvider,
         INavTreeProvider navTreeProvider,
-        IAuthAdapter? authAdapter
+        IAuthAdapter? authAdapter = null
     )
     {
         _sourcesProvider = sourcesProvider;
