@@ -89,7 +89,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
 
     private static string RewriteImageLink(string? decodedUrl, string relativePath)
     {
-        var parent = string.Join('/', relativePath.Split('/').SkipLast(1));
+        var parent = string.Join('/', relativePath.Split(Path.DirectorySeparatorChar).SkipLast(1));
         parent = string.IsNullOrWhiteSpace(parent) ? "" : $"{parent}/";
 
         var location = parent + decodedUrl;

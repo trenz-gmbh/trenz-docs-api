@@ -56,9 +56,9 @@ public class MarkdownFileProcessingServiceTest
 
     public static IEnumerable<object[]> RewriteLinksValuesProvider()
     {
-        yield return new object[] { "./test.md", false, "test.md", "./test" };
-        yield return new object[] { "assets/image.png", true, "nested/document.md", "%API_HOST%/File/nested/assets/image.png" };
-        yield return new object[] { "../another_image.png", true, "nested/document.md", "%API_HOST%/File/another_image.png" };
+        yield return new object[] { "./test.md", false, "test.md", "test" };
+        yield return new object[] { "assets/image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/nested/assets/image.png" };
+        yield return new object[] { "../another_image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/another_image.png" };
     }
 
     [DataTestMethod]
