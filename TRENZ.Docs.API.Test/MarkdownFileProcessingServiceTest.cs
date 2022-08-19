@@ -61,6 +61,8 @@ public class MarkdownFileProcessingServiceTest
         yield return new object[] { "../another_image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/another_image.png" };
         yield return new object[] { "../another_page.md", false, Path.Combine("nested", "document.md"), "another_page" };
         yield return new object[] { "../another/nested-page.md", false, Path.Combine("nested", "document.md"), "another/nested%20page" };
+        // go one level up, then a different folder back down
+        yield return new object[] { "../a2/a21.md", false, Path.Combine("a", "a1", "a11.md"), "a/a2/a21" };
         yield return new object[] { "path-with-hyphens/File%252DName.md", false, "links.md", "path%20with%20hyphens/File-Name" };
         yield return new object[] { "https://google.com/", false, "external.md", "https://google.com/" };
     }
