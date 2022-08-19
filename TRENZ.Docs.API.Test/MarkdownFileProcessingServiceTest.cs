@@ -30,7 +30,7 @@ public class MarkdownFileProcessingServiceTest
                 new IndexFile(
                     "BE53A0541A6D36F6ECB879FA2C584B08",
                     "Image",
-                    "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/..%2frelative.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
+                    "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
                     "Image"
                 ),
             },
@@ -52,5 +52,21 @@ public class MarkdownFileProcessingServiceTest
             Assert.AreEqual(expected.content, output.content);
             Assert.AreEqual(expected.location, output.location);
         }
+    }
+
+    public static IEnumerable<object[]> RewriteLinksValuesProvider()
+    {
+        yield return new object[] { "./test.md", false, "test.md", "test" };
+        yield return new object[] { "assets/image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/nested/assets/image.png" };
+        yield return new object[] { "../another_image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/another_image.png" };
+    }
+
+    [DataTestMethod]
+    [DynamicData(nameof(RewriteLinksValuesProvider), DynamicDataSourceType.Method)]
+    public void TestRewriteLinks(string? original, bool isImage, string relativePath, string? expected)
+    {
+        var rewritten = MarkdownFileProcessingService.RewriteLinks(original, isImage, relativePath);
+
+        Assert.AreEqual(expected, rewritten);
     }
 }
