@@ -56,20 +56,20 @@ public class MarkdownFileProcessingServiceTest
 
     public static IEnumerable<object[]> RewriteLinksValuesProvider()
     {
-        yield return new object[] { "./test.md", false, "test.md", "test" };
+        yield return new object[] { "./test.md", false, "test.md", "/wiki/test" };
         yield return new object[] { "assets/image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/nested/assets/image.png" };
         yield return new object[] { "../another_image.png", true, Path.Combine("nested", "document.md"), "%API_HOST%/File/another_image.png" };
-        yield return new object[] { "../another_page.md", false, Path.Combine("nested", "document.md"), "another_page" };
-        yield return new object[] { "../another/nested-page.md", false, Path.Combine("nested", "document.md"), "another/nested%20page" };
+        yield return new object[] { "../another_page.md", false, Path.Combine("nested", "document.md"), "/wiki/another_page" };
+        yield return new object[] { "../another/nested-page.md", false, Path.Combine("nested", "document.md"), "/wiki/another/nested%20page" };
         // go one level up, then a different folder back down
-        yield return new object[] { "../a2/a21.md", false, Path.Combine("a", "a1", "a11.md"), "a/a2/a21" };
-        yield return new object[] { "path-with-hyphens/File%252DName.md", false, "links.md", "path%20with%20hyphens/File-Name" };
+        yield return new object[] { "../a2/a21.md", false, Path.Combine("a", "a1", "a11.md"), "/wiki/a/a2/a21" };
+        yield return new object[] { "path-with-hyphens/File%252DName.md", false, "links.md", "/wiki/path%20with%20hyphens/File-Name" };
         yield return new object[] { "https://google.com/", false, "external.md", "https://google.com/" };
     }
 
     [DataTestMethod]
     [DynamicData(nameof(RewriteLinksValuesProvider), DynamicDataSourceType.Method)]
-    public void TestRewriteLinks(string? original, bool isImage, string relativePath, string? expected)
+    public void TestRewriteLinks(string original, bool isImage, string relativePath, string? expected)
     {
         var rewritten = MarkdownFileProcessingService.RewriteLinks(original, isImage, relativePath);
 

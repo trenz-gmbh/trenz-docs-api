@@ -106,7 +106,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
     private static string RewriteInlineLink(string location)
     {
         location = NavNode.PathToLocation(location.EndsWith(".md") ? location[..^3] : location);
-        location = CanonicalizeUrl(location);
+        location = "/wiki/" + CanonicalizeUrl(location);
         return HttpUtility.UrlPathEncode(location);
     }
 
