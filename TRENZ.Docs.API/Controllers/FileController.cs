@@ -43,7 +43,7 @@ public class FileController : ControllerBase
         if (file == null)
             return NotFound();
 
-        var parentNodeLocation = file.RelativePath.Split(Path.DirectorySeparatorChar).ToArray();
+        var parentNodeLocation = file.RelativePath.Split(Path.DirectorySeparatorChar).SkipLast(1).ToArray();
         if (parentNodeLocation.Length > 0) // length == 0 if file is in root
         {
             var parentNode = effectiveNavTree.FindNodeByLocationParts(parentNodeLocation);
