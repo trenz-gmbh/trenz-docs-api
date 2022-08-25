@@ -30,7 +30,7 @@ public class MarkdownFileProcessingServiceTest
                 new IndexFile(
                     "BE53A0541A6D36F6ECB879FA2C584B08",
                     "Image",
-                    "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
+                    "![Image](%API_HOST%/File/test.png)  \n![Image](%API_HOST%/File/images/public/nested.png)",
                     "Image"
                 ),
             },
