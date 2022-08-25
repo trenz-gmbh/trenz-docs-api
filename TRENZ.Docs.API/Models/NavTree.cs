@@ -75,7 +75,7 @@ public class NavTree
                     children = FilterChildrenBy(node.Children, includeNode, includeContent, includeChildren, onNodeExcluded);
 
                 var hasContent = node.HasContent;
-                if (includeContent(node))
+                if (!includeContent(node))
                 {
                     hasContent = false;
                     onNodeExcluded?.Invoke(node);

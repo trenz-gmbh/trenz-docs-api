@@ -42,9 +42,9 @@ public class NavTreeTest
             {
                 "root", new("root")
                 {
-                    Order = 0, Children = new()
+                    Order = 0, HasContent = true, Children = new()
                     {
-                        { "nested", new("root/nested") { Order = 0 } },
+                        { "nested", new("root/nested") { Order = 0, HasContent = true } },
                         { "nested-hidden", new("root/nested-hidden") { Order = -1 } },
                     },
                 }
@@ -57,9 +57,9 @@ public class NavTreeTest
             {
                 "root", new("root")
                 {
-                    Order = 0, Children = new()
+                    Order = 0, HasContent = true, Children = new()
                     {
-                        { "nested", new("root/nested") { Order = 0 } },
+                        { "nested", new("root/nested") { Order = 0, HasContent = true } },
                     },
                 }
             },
