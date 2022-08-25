@@ -49,6 +49,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
                 // .UseYamlFrontMatter()
                 // .UseDiagrams()
                 // .UseGenericAttributes()
+                .UseSoftlineBreakAsHardlineBreak()
                 .Build();
 
             foreach (var f in files)
