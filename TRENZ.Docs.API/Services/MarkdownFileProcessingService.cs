@@ -18,7 +18,7 @@ public class MarkdownFileProcessingService : IFileProcessingService
     private static string ToMd5(string text) => Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(text)));
 
     private readonly ILogger<MarkdownFileProcessingService> _logger;
-    
+
     public MarkdownFileProcessingService(ILogger<MarkdownFileProcessingService> logger)
     {
         _logger = logger;
@@ -27,61 +27,40 @@ public class MarkdownFileProcessingService : IFileProcessingService
     /// <inheritdoc />
     public async IAsyncEnumerable<IndexFile> ProcessAsync(IEnumerable<ISourceFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-            var markdownPipeline = new MarkdownPipelineBuilder()
-                // .UseAbbreviations()
-                // .UseAutoIdentifiers() // causes random "[]:" at the end
-                // .UseCitations()
-                // .UseCustomContainers()
-                // .UseDefinitionLists()
-                // .UseEmphasisExtras()
-                // .UseFigures()
-                // .UseFooters()
-                // .UseFootnotes()
-                // .UseGridTables()
-                // .UseMathematics()
-                // .UseMediaLinks()
-                // .UsePipeTables()
-                // .UseListExtras()
-                // .UseTaskLists()
-                // .UseDiagrams()
-                // .UseAutoLinks()
-                // .UseEmojiAndSmiley()
-                // .UseYamlFrontMatter()
-                // .UseDiagrams()
-                // .UseGenericAttributes()
-                .Build();
+        var markdownPipelineBuilder = new MarkdownPipelineBuilder();
+        var markdownPipeline = markdownPipelineBuilder.Build();
 
-            foreach (var f in files)
+        foreach (var f in files)
+        {
+            _logger.LogInformation("Processing {File}", f.RelativePath);
+
+            var content = await f.GetTextAsync(cancellationToken);
+            var document = Markdown.Parse(content, markdownPipeline);
+
+            foreach (var child in document.Descendants())
             {
-                _logger.LogInformation("Processing {File}", f.RelativePath);
+                if (child is not LinkInline link)
+                    continue;
 
-                var content = await f.GetTextAsync(cancellationToken);
-                var document = Markdown.Parse(content, markdownPipeline);
+                if (link.Url == null)
+                    continue;
 
-                foreach (var child in document.Descendants())
-                {
-                    if (child is not LinkInline link)
-                        continue;
-
-                    if (link.Url == null)
-                        continue;
-
-                    link.Url = RewriteLinks(link.Url, link.IsImage, f.RelativePath);
-                    if (link.Reference != null) link.Reference.Url = null;
-                }
-
-                var builder = new StringBuilder();
-                var writer = new StringWriter(builder);
-                var renderer = new NormalizeRenderer(writer);
-                renderer.Render(document);
-
-                yield return new(
-                    ToMd5(f.Location),
-                    f.Name,
-                    builder.ToString(),
-                    f.Location
-                );
+                link.Url = RewriteLinks(link.Url, link.IsImage, f.RelativePath);
+                if (link.Reference != null) link.Reference.Url = null;
             }
+
+            var builder = new StringBuilder();
+            var writer = new StringWriter(builder);
+            var renderer = new NormalizeRenderer(writer);
+            renderer.Render(document);
+
+            yield return new(
+                ToMd5(f.Location),
+                f.Name,
+                builder.ToString(),
+                f.Location
+            );
+        }
     }
 
     public static string RewriteLinks(string original, bool isImage, string relativePath)
