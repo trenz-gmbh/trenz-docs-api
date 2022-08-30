@@ -18,6 +18,7 @@ public class MarkdownFileProcessingServiceTest
             {
                 new PhysicalSourceFile(testConfig, "Test.md"),
                 new PhysicalSourceFile(testConfig, "Image.md"),
+                new PhysicalSourceFile(testConfig, "Line-Breaks.md"),
             },
             new[]
             {
@@ -32,6 +33,12 @@ public class MarkdownFileProcessingServiceTest
                     "Image",
                     "![Image](%API_HOST%/File/test.png)\n![Image](%API_HOST%/File/images/public/nested.png)",
                     "Image"
+                ),
+                new IndexFile(
+                    "9A6FEDC1A875D0EF0E404F27A48B43E6",
+                    "Line Breaks",
+                    "A database will have one or more **tables**, each of which contains\n**rows**.",
+                    "Line Breaks"
                 ),
             },
         };

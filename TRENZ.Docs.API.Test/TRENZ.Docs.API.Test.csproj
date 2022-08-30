@@ -53,6 +53,10 @@
       <Content Include="Data\Invalid\.authz">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <None Remove="Data\Line-Breaks.md" />
+      <Content Include="Data\Line-Breaks.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

@@ -79,7 +79,7 @@ public class LocalSourceTest
         {
             ".*\\.md$",
             source,
-            new[] { "Image.md", "Test.md", Path.Combine("Nested", "Text.md") },
+            new[] { "Image.md", "Test.md", "Line-Breaks.md", Path.Combine("Nested", "Text.md") },
         };
 
         yield return new object[]
