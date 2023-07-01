@@ -9,10 +9,14 @@ namespace TRENZ.Docs.API.Controllers;
 public class SearchController : ControllerBase
 {
     private readonly IIndexingService _indexingService;
+    private readonly IConfiguration _configuration;
+    private readonly Worker _worker;
 
-    public SearchController(IIndexingService indexingService)
+    public SearchController(IIndexingService indexingService, IConfiguration configuration, Worker worker)
     {
         _indexingService = indexingService;
+        _configuration = configuration;
+        _worker = worker;
     }
 
     [HttpGet]
@@ -25,5 +29,21 @@ public class SearchController : ControllerBase
     public async Task<IndexStats> Stats()
     {
         return await _indexingService.GetStats();
+    }
+
+    [HttpGet]
+    public async Task Reindex([FromQuery] string? key, CancellationToken cancellationToken = default)
+    {
+        if (_configuration["ReindexPassword"] != key)
+            return;
+
+#if !DEBUG
+        if (DateTime.Now - _lastReindex < TimeSpan.FromMinutes(30))
+            return;
+
+        _lastReindex = DateTime.Now;
+#endif
+
+        await _worker.DoReindex(cancellationToken);
     }
 }
