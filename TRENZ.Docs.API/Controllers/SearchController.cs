@@ -8,6 +8,8 @@ namespace TRENZ.Docs.API.Controllers;
 [Route("api/[controller]/[action]")]
 public class SearchController : ControllerBase
 {
+    private static DateTime? _lastReindex;
+
     private readonly IIndexingService _indexingService;
     private readonly IConfiguration _configuration;
     private readonly Worker _worker;
