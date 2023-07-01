@@ -12,13 +12,13 @@ public class SearchController : ControllerBase
 
     private readonly IIndexingService _indexingService;
     private readonly IConfiguration _configuration;
-    private readonly Worker _worker;
+    private readonly IndexWorker _indexWorker;
 
-    public SearchController(IIndexingService indexingService, IConfiguration configuration, Worker worker)
+    public SearchController(IIndexingService indexingService, IConfiguration configuration, IndexWorker indexWorker)
     {
         _indexingService = indexingService;
         _configuration = configuration;
-        _worker = worker;
+        _indexWorker = indexWorker;
     }
 
     [HttpGet]
@@ -46,6 +46,6 @@ public class SearchController : ControllerBase
         _lastReindex = DateTime.Now;
 #endif
 
-        await _worker.DoReindex(cancellationToken);
+        await _indexWorker.DoReindex(cancellationToken);
     }
 }

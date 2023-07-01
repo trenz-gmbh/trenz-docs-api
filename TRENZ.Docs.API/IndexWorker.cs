@@ -4,9 +4,9 @@ using TRENZ.Docs.API.Models.Sources;
 
 namespace TRENZ.Docs.API
 {
-    public class Worker : BackgroundService
+    public class IndexWorker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger<IndexWorker> _logger;
         private readonly IConfiguration _configuration;
         private readonly IHostApplicationLifetime _lifetime;
         private readonly IIndexingService _indexingService;
@@ -14,7 +14,7 @@ namespace TRENZ.Docs.API
         private readonly IFileProcessingService _fileProcessingService;
         private readonly INavTreeProvider _navTreeProvider;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration, IHostApplicationLifetime lifetime, IIndexingService indexingService, ISourcesProvider sourcesProvider, IFileProcessingService fileProcessingService, INavTreeProvider navTreeProvider)
+        public IndexWorker(ILogger<IndexWorker> logger, IConfiguration configuration, IHostApplicationLifetime lifetime, IIndexingService indexingService, ISourcesProvider sourcesProvider, IFileProcessingService fileProcessingService, INavTreeProvider navTreeProvider)
         {
             _logger = logger;
             _configuration = configuration;
