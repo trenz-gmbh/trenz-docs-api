@@ -83,7 +83,7 @@ public class NavTreeProviderTest
         var nodeAuthorizationMock = new Mock<INavNodeAuthorizationService>();
         nodeAuthorizationMock.Setup(authorizer => authorizer.UpdateGroupsAsync(new(new(), false), default)).Returns(Task.CompletedTask);
 
-        var service = new NavTreeProvider(nodeFlaggerMock.Object, nodeOrderingMock.Object, nodeAuthorizationMock.Object);
+        var service = new NavTreeProvider(nodeFlaggerMock.Object, nodeOrderingMock.Object, nodeAuthorizationMock.Object, TestHelper.GetLogger<NavTreeProvider>());
         var tree = await service.RebuildAsync(indexFiles);
 
         tree.Root.AssertDeepSequenceEquals(

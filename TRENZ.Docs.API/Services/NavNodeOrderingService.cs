@@ -19,9 +19,11 @@ namespace TRENZ.Docs.API.Services
 
         public async Task ReorderTreeAsync(NavTree tree, CancellationToken cancellationToken = default)
         {
+            _logger.LogDebug("Reordering tree...");
+
             var orderFiles = _sourcesProvider.GetSources()
                                              .SelectMany(source => source.FindFiles(new("\\.order")))
-                                             .ToDictionary(sf => sf.RelativePath.Split(Path.DirectorySeparatorChar)[..^1],
+                                             .ToDictionary(sf => NavNode.PathToLocation(sf.RelativePath).Split(NavNode.Separator)[..^1],
                                                            sf => sf);
 
             var i = 0;
@@ -31,6 +33,8 @@ namespace TRENZ.Docs.API.Services
             }
 
             await SetChildrenOrderByOrderFile(Array.Empty<string>(), tree.Root.Values, orderFiles, cancellationToken);
+
+            _logger.LogDebug("Reordering done");
         }
 
         private async Task SetOrderByParent(NavNode node, Dictionary<string[], ISourceFile> orderFiles, int index, CancellationToken cancellationToken)
@@ -49,7 +53,7 @@ namespace TRENZ.Docs.API.Services
             await SetChildrenOrderByOrderFile(node.LocationParts, node.Children.Values, orderFiles, cancellationToken);
         }
 
-        private async Task SetChildrenOrderByOrderFile(IEnumerable<string> pathParts,
+        private async Task SetChildrenOrderByOrderFile(IEnumerable<string> locationParts,
                                                        IEnumerable<NavNode> children,
                                                        Dictionary<string[], ISourceFile> orderFiles,
                                                        CancellationToken cancellationToken = default)
@@ -58,7 +62,7 @@ namespace TRENZ.Docs.API.Services
                 return;
 
             // if this particular folder has a .order, override the order
-            var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(pathParts));
+            var orderFile = orderFiles.SingleOrDefault(of => of.Key.SequenceEqual(locationParts));
 
             if (orderFile.Value == null)
                 return;

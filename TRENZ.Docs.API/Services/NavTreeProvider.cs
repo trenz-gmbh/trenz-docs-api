@@ -6,20 +6,24 @@ namespace TRENZ.Docs.API.Services;
 
 public class NavTreeProvider : INavTreeProvider
 {
+    private readonly ILogger<NavTreeProvider> _logger;
     private readonly INavNodeFlaggingService _flaggingService;
     private readonly INavNodeOrderingService _orderingService;
     private readonly INavNodeAuthorizationService _authorizationService;
 
-    public NavTreeProvider(INavNodeFlaggingService flaggingService, INavNodeOrderingService orderingService, INavNodeAuthorizationService authorizationService)
+    public NavTreeProvider(INavNodeFlaggingService flaggingService, INavNodeOrderingService orderingService, INavNodeAuthorizationService authorizationService, ILogger<NavTreeProvider> logger)
     {
         _flaggingService = flaggingService;
         _orderingService = orderingService;
         _authorizationService = authorizationService;
+        _logger = logger;
     }
 
     /// <inheritdoc />
     public async Task<NavTree> RebuildAsync(List<ISourceFile> files, CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Rebuilding tree using {Count} files", files.Count);
+
         var root = new Dictionary<string, NavNode>();
 
         foreach (var file in files)
@@ -47,17 +51,23 @@ public class NavTreeProvider : INavTreeProvider
                     node = node[nodeName].Children ??= new();
                 }
             }
+
+            _logger.LogTrace("Added file to tree: {Location}", string.Join(NavNode.Separator, currentLocation));
         }
 
         Tree = new(root);
 
         await PostProcessTree(files, cancellationToken);
 
+        _logger.LogDebug("Tree rebuilt");
+
         return Tree;
     }
 
     private async Task PostProcessTree(List<ISourceFile> files, CancellationToken cancellationToken)
     {
+        _logger.LogDebug("Post processing tree...");
+
         await _flaggingService.UpdateHasContentFlagAsync(Tree.Root, files, cancellationToken);
         await _orderingService.ReorderTreeAsync(Tree, cancellationToken);
         await _authorizationService.UpdateGroupsAsync(Tree, cancellationToken);
