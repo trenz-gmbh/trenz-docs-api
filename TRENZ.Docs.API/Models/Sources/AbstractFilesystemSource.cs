@@ -28,7 +28,7 @@ public abstract class AbstractFilesystemSource : ISource
     {
         var combinedRoot = FSPath.Combine(Root, Path);
 
-        if (combinedRoot.Length < Root.Length)
+        if (FSPath.GetFullPath(combinedRoot).Length < Root.Length)
             throw new SecurityException(ExceptionMessages.PreventedPathTraversal);
 
         return IterateDirectory(pattern, combinedRoot, combinedRoot);
