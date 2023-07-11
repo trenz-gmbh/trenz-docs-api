@@ -1,8 +1,12 @@
-﻿namespace TRENZ.Docs.API.Models.Sources;
+﻿using TRENZ.Docs.API.Interfaces;
+using TRENZ.Docs.API.Services;
+
+namespace TRENZ.Docs.API.Models.Sources;
 
 public sealed class LocalSource : AbstractFilesystemSource
 {
-    public static LocalSource FromConfiguration(IConfiguration configuration)
+    public static LocalSource FromConfiguration(IConfiguration configuration,
+                                                ISafeFileSystemPathTraversalService pathTraversalService)
     {
         if (!string.Equals(configuration["Type"], SourceType.Local.GetValue(), StringComparison.InvariantCultureIgnoreCase))
         {
@@ -19,11 +23,10 @@ public sealed class LocalSource : AbstractFilesystemSource
             throw new ArgumentException("Root is required");
         }
 
-        return new(
-            configuration["Name"],
-            configuration["Root"],
-            configuration["Path"] ?? ""
-        );
+        return new(pathTraversalService,
+                   configuration["Name"],
+                   configuration["Root"],
+                   configuration["Path"] ?? "");
     }
 
     public override SourceType Type => SourceType.Local;
@@ -31,7 +34,9 @@ public sealed class LocalSource : AbstractFilesystemSource
     public override string Root { get; }
     public override string Path { get; }
 
-    public LocalSource(string name, string root, string path = "")
+    public LocalSource(ISafeFileSystemPathTraversalService pathTraversalService,
+                       string name, string root, string path = "") :
+        base(pathTraversalService)
     {
         Name = name;
         Root = root;

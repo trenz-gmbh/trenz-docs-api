@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using TRENZ.Docs.API.Interfaces;
 using TRENZ.Docs.API.Models;
 using TRENZ.Docs.API.Models.Sources;
+using TRENZ.Docs.API.Services;
 using TRENZ.Docs.API.Test.Models.Sources;
 using TRENZ.Docs.API.Test.Services;
 
@@ -36,9 +38,12 @@ public static class TestHelper
 
     public static ISourcesProvider ProvideFiles(string path)
     {
-        var source = new LocalSource("Test", path);
+        var source = new LocalSource(GetPathTraversalService(), "Test", path);
         return new MemorySourcesProvider(new[] { source });
     }
+
+    public static ISafeFileSystemPathTraversalService GetPathTraversalService()
+        => new SafeFileSystemPathTraversalService();
 
     public static void AssertDeepSequenceEquals<T>(this IEnumerable<T>? a, IEnumerable<T>? b, Func<T, IEnumerable<T>?> childSelector, Action<T, T>? assertion)
     {

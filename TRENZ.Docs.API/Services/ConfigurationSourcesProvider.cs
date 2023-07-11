@@ -7,11 +7,14 @@ public class ConfigurationSourcesProvider : ISourcesProvider
 {
     private readonly IConfiguration _configuration;
     private readonly ILoggerFactory _loggerFactory;
-    
-    public ConfigurationSourcesProvider(IConfiguration configuration, ILoggerFactory loggerFactory)
+    private readonly ISafeFileSystemPathTraversalService _pathTraversalService;
+
+    public ConfigurationSourcesProvider(IConfiguration configuration, ILoggerFactory loggerFactory,
+                                        ISafeFileSystemPathTraversalService pathTraversalService)
     {
         _configuration = configuration;
         _loggerFactory = loggerFactory;
+        _pathTraversalService = pathTraversalService;
     }
 
     /// <inheritdoc />
@@ -23,8 +26,9 @@ public class ConfigurationSourcesProvider : ISourcesProvider
             .Where(s => s["Type"] != null)
             .Select<IConfigurationSection, ISource>(s => s["Type"] switch
             {
-                "git" => new GitSource(s, _loggerFactory.CreateLogger<GitSource>()),
-                "local" => LocalSource.FromConfiguration(s),
+                "git" => new GitSource(s, _loggerFactory.CreateLogger<GitSource>(),
+                                       _pathTraversalService),
+                "local" => LocalSource.FromConfiguration(s, _pathTraversalService),
                 _ => throw new NotImplementedException($"The source type '{s["Type"]}' is not implemented. Must be one of: 'git', 'local'"),
             });
     }

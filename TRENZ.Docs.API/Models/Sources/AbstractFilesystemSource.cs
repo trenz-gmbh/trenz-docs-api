@@ -1,4 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+
+using TRENZ.Docs.API.Interfaces;
+
 using FSPath = System.IO.Path;
 
 namespace TRENZ.Docs.API.Models.Sources;
@@ -17,11 +20,19 @@ public abstract class AbstractFilesystemSource : ISource
     /// <inheritdoc />
     public abstract string Path { get; }
 
+    public ISafeFileSystemPathTraversalService PathTraversalService { get; }
+
+    public AbstractFilesystemSource(ISafeFileSystemPathTraversalService pathTraversalService)
+    {
+        PathTraversalService = pathTraversalService;
+    }
+
     /// <inheritdoc />
     public IEnumerable<ISourceFile> FindFiles(Regex pattern)
     {
-        var root = FSPath.Combine(Root, Path);
-        return IterateDirectory(pattern, root, root);
+        var combinedRoot = PathTraversalService.SafeCombine(Root, Path);
+
+        return IterateDirectory(pattern, combinedRoot, combinedRoot);
     }
 
     /// <inheritdoc />
@@ -40,7 +51,7 @@ public abstract class AbstractFilesystemSource : ISource
         });
 
         return from file in fileInfoEnumerable
-            where file.Exists && pattern.IsMatch(file.Name)
-            select new PhysicalSourceFile(this, FSPath.GetRelativePath(root, file.FullName));
+               where file.Exists && pattern.IsMatch(file.Name)
+               select new PhysicalSourceFile(this, FSPath.GetRelativePath(root, file.FullName));
     }
 }
