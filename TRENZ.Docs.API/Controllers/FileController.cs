@@ -37,7 +37,7 @@ public class FileController : ControllerBase
         var normalizedLocation = Uri.UnescapeDataString(location).TrimStart(NavNode.Separator);
         var file = _sourcesProvider
             .GetSources()
-            .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json)$")))
+            .SelectMany(source => source.FindFiles(new(".*\\.(png|jpe?g|gif|json|svgz?)$")))
             .FirstOrDefault(sf => sf.RelativePath == Path.GetRelativePath(".", normalizedLocation));
 
         if (file == null)
