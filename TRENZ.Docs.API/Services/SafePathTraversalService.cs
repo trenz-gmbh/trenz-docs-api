@@ -20,8 +20,13 @@ public class SafeFileSystemPathTraversalService : ISafeFileSystemPathTraversalSe
     {
         var combinedRoot = FSPath.Combine(root, path);
 
-        if (!FSPath.GetFullPath(combinedRoot).StartsWith(root))
-            throw PreventedPathTraversal;
+        {
+            var fullRoot = FSPath.GetFullPath(root);
+            var fullCombinedRoot = FSPath.GetFullPath(combinedRoot);
+
+            if (!fullCombinedRoot.StartsWith(fullRoot))
+                throw PreventedPathTraversal;
+        }
 
         return combinedRoot;
     }
