@@ -16,7 +16,7 @@ public class SafeFileSystemPathTraversalService : ISafeFileSystemPathTraversalSe
     private static SecurityException PreventedPathTraversal
         => new("Prevented an attempt to traverse a path outside the source's root.");
 
-    public string Traverse(string root, string path)
+    public string SafeCombine(string root, string path)
     {
         var combinedRoot = FSPath.Combine(root, path);
 

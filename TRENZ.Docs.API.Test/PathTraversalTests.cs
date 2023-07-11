@@ -20,7 +20,7 @@ public class PathTraversalTests
 
         expectedFullRoot = NormalizeDirectorySeparatorChar(expectedFullRoot);
 
-        var traversedPath = pathTraversalService.Traverse(root, path);
+        var traversedPath = pathTraversalService.SafeCombine(root, path);
 
         traversedPath = NormalizeDirectorySeparatorChar(traversedPath);
 
@@ -40,7 +40,7 @@ public class PathTraversalTests
     {
         var pathTraversalService = TestHelper.GetPathTraversalService();
 
-        Assert.IsNotNull(pathTraversalService.Traverse(root, path));
+        Assert.IsNotNull(pathTraversalService.SafeCombine(root, path));
     }
 
     [DataTestMethod]
@@ -52,7 +52,7 @@ public class PathTraversalTests
 
         Assert.ThrowsException<SecurityException>(() =>
         {
-            pathTraversalService.Traverse(root, path);
+            pathTraversalService.SafeCombine(root, path);
         });
     }
 }

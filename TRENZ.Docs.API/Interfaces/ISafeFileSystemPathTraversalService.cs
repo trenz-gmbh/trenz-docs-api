@@ -2,5 +2,5 @@
 
 public interface ISafeFileSystemPathTraversalService
 {
-    string Traverse(string root, string path);
+    string SafeCombine(string root, string path);
 }

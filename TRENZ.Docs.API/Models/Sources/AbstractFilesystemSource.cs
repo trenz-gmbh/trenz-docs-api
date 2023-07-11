@@ -30,7 +30,7 @@ public abstract class AbstractFilesystemSource : ISource
     /// <inheritdoc />
     public IEnumerable<ISourceFile> FindFiles(Regex pattern)
     {
-        var combinedRoot = PathTraversalService.Traverse(Root, Path);
+        var combinedRoot = PathTraversalService.SafeCombine(Root, Path);
 
         return IterateDirectory(pattern, combinedRoot, combinedRoot);
     }
