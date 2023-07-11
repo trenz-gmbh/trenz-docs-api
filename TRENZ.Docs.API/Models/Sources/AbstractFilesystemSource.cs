@@ -1,13 +1,13 @@
-﻿using System.Security;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+
+using TRENZ.Docs.API.Interfaces;
+
 using FSPath = System.IO.Path;
 
 namespace TRENZ.Docs.API.Models.Sources;
 
 public abstract class AbstractFilesystemSource : ISource
 {
-    private static SecurityException PreventedPathTraversal => new("Prevented an attempt to traverse a path outside the source's root.");
-
     /// <inheritdoc />
     public abstract string Name { get; }
 
@@ -20,13 +20,17 @@ public abstract class AbstractFilesystemSource : ISource
     /// <inheritdoc />
     public abstract string Path { get; }
 
+    public ISafeFileSystemPathTraversalService PathTraversalService { get; }
+
+    public AbstractFilesystemSource(ISafeFileSystemPathTraversalService pathTraversalService)
+    {
+        PathTraversalService = pathTraversalService;
+    }
+
     /// <inheritdoc />
     public IEnumerable<ISourceFile> FindFiles(Regex pattern)
     {
-        var combinedRoot = FSPath.Combine(Root, Path);
-
-        if (!FSPath.GetFullPath(combinedRoot).StartsWith(Root))
-            throw PreventedPathTraversal;
+        var combinedRoot = PathTraversalService.Traverse(Root, Path);
 
         return IterateDirectory(pattern, combinedRoot, combinedRoot);
     }

@@ -1,5 +1,7 @@
 ﻿using LibGit2Sharp;
 
+using TRENZ.Docs.API.Interfaces;
+
 namespace TRENZ.Docs.API.Models.Sources;
 
 public class GitSource : AbstractFilesystemSource
@@ -17,7 +19,9 @@ public class GitSource : AbstractFilesystemSource
     public string? Username => _configuration["Username"];
     public string? Password => _configuration["Password"];
 
-    public GitSource(IConfiguration configuration, ILogger<GitSource> logger)
+    public GitSource(IConfiguration configuration, ILogger<GitSource> logger,
+                     ISafeFileSystemPathTraversalService pathTraversalService)
+        : base(pathTraversalService)
     {
         _configuration = configuration;
         _logger = logger;
@@ -34,10 +38,10 @@ public class GitSource : AbstractFilesystemSource
         {
             _logger.LogInformation("Directory '{Temp}' does not exist. Cloning repository {SourceUrl}", temp, Url);
             Repository.Clone(Url, temp, new()
-                {
-                    BranchName = Branch,
-                    CredentialsProvider = CredentialsHelper,
-                }
+            {
+                BranchName = Branch,
+                CredentialsProvider = CredentialsHelper,
+            }
             );
         }
 

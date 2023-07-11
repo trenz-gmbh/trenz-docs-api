@@ -24,8 +24,9 @@ public class LocalSourceTest
         Assert.ThrowsException<ArgumentException>(() =>
         {
             var configuration = TestHelper.GetConfiguration(config);
+            var pathTraversalService = TestHelper.GetPathTraversalService();
 
-            return LocalSource.FromConfiguration(configuration);
+            return LocalSource.FromConfiguration(configuration, pathTraversalService);
         });
     }
 
@@ -41,7 +42,9 @@ public class LocalSourceTest
     public void TestConstructorDoesNotThrowForValidConfig(Dictionary<string, string> config)
     {
         var configuration = TestHelper.GetConfiguration(config);
-        var source = LocalSource.FromConfiguration(configuration);
+        var pathTraversalService = TestHelper.GetPathTraversalService();
+
+        var source = LocalSource.FromConfiguration(configuration, pathTraversalService);
         Assert.AreEqual(SourceType.Local, source.Type);
         Assert.AreEqual(config["Name"], source.Name);
         Assert.AreEqual(config["Root"], source.Root);
@@ -52,7 +55,9 @@ public class LocalSourceTest
     public void TestUpdateAsync()
     {
         var configuration = TestHelper.GetConfiguration(new Dictionary<string, string> { { "Type", "local" }, { "Name", "name" }, { "Root", "root" } });
-        var source = LocalSource.FromConfiguration(configuration);
+        var pathTraversalService = TestHelper.GetPathTraversalService();
+
+        var source = LocalSource.FromConfiguration(configuration, pathTraversalService);
         var task = source.UpdateAsync();
         Assert.IsTrue(task.IsCompleted);
     }
@@ -67,13 +72,17 @@ public class LocalSourceTest
     public void TestToString(Dictionary<string, string> config, string expected)
     {
         var configuration = TestHelper.GetConfiguration(config);
-        var source = LocalSource.FromConfiguration(configuration);
+        var pathTraversalService = TestHelper.GetPathTraversalService();
+
+        var source = LocalSource.FromConfiguration(configuration, pathTraversalService);
         Assert.AreEqual(expected, source.ToString());
     }
 
     public static IEnumerable<object[]> FindFilesValuesProvider()
     {
-        var source = new LocalSource("Test", "./Data");
+        var pathTraversalService = TestHelper.GetPathTraversalService();
+
+        var source = new LocalSource(pathTraversalService, "Test", "./Data");
 
         yield return new object[]
         {

@@ -26,7 +26,9 @@ public class ConfigurationSourcesProviderTest
 
         var loggerFactory = new LoggerFactory();
 
-        var provider = new ConfigurationSourcesProvider(config, loggerFactory);
+        var pathTraversalService = TestHelper.GetPathTraversalService();
+
+        var provider = new ConfigurationSourcesProvider(config, loggerFactory, pathTraversalService);
         var sources = provider.GetSources().ToList();
 
         Assert.AreEqual(2, sources.Count);
@@ -52,8 +54,9 @@ public class ConfigurationSourcesProviderTest
         });
 
         var loggerFactory = new LoggerFactory();
+        var pathTraversalService = TestHelper.GetPathTraversalService();
 
-        var provider = new ConfigurationSourcesProvider(config, loggerFactory);
+        var provider = new ConfigurationSourcesProvider(config, loggerFactory, pathTraversalService);
 
         Assert.ThrowsException<NotImplementedException>(() => provider.GetSources().ToList(), "The source type 'invalid' is not implemented. Must be on of: 'git', 'local'");
     }

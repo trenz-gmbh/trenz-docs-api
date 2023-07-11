@@ -33,6 +33,8 @@ builder.Services.AddSingleton<INavNodeFlaggingService, NavNodeFlaggingService>()
 builder.Services.AddSingleton<INavNodeAuthorizationService, NavNodeAuthorizationService>();
 builder.Services.AddSingleton<IPermissionTableProvider, TomlAuthzPermissionTableProvider>();
 
+builder.Services.AddSingleton<ISafeFileSystemPathTraversalService, SafeFileSystemPathTraversalService>();
+
 if (builder.Configuration.GetSection("Auth").Exists())
 {
     builder.Services.AddAuthAdapter();
