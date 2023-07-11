@@ -6,10 +6,7 @@ namespace TRENZ.Docs.API.Models.Sources;
 
 public abstract class AbstractFilesystemSource : ISource
 {
-    private class ExceptionMessages
-    {
-        public const string PreventedPathTraversal = "Prevented an attempt to traverse a path outside the source's root.";
-    }
+    private static SecurityException PreventedPathTraversal => new("Prevented an attempt to traverse a path outside the source's root.");
 
     /// <inheritdoc />
     public abstract string Name { get; }
@@ -28,8 +25,8 @@ public abstract class AbstractFilesystemSource : ISource
     {
         var combinedRoot = FSPath.Combine(Root, Path);
 
-        if (FSPath.GetFullPath(combinedRoot).Length < Root.Length)
-            throw new SecurityException(ExceptionMessages.PreventedPathTraversal);
+        if (!FSPath.GetFullPath(combinedRoot).StartsWith(Root))
+            throw PreventedPathTraversal;
 
         return IterateDirectory(pattern, combinedRoot, combinedRoot);
     }
