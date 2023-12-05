@@ -22,9 +22,9 @@ public class SearchController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<SearchResult>> Query([FromQuery] string q)
+    public async Task<SearchResults> Query(string q, int? limit, int? offset)
     {
-        return await _indexingService.Search(q);
+        return await _indexingService.Search(q, limit, offset);
     }
 
     [HttpGet]

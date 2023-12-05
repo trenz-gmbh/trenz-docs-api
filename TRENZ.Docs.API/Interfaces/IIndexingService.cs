@@ -6,6 +6,6 @@ public interface IIndexingService
 {
     Task IndexAsync(IEnumerable<IndexFile> files, CancellationToken cancellationToken = default);
     Task<IndexFile?> GetIndexedFile(string location, CancellationToken cancellationToken = default);
-    Task<IEnumerable<SearchResult>> Search(string query, CancellationToken cancellationToken = default);
+    Task<SearchResults> Search(string query, int? limit = null, int? offset = null, CancellationToken cancellationToken = default);
     Task<IndexStats> GetStats(CancellationToken cancellationToken = default);
 }
