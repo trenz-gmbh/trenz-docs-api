@@ -40,7 +40,8 @@ if (builder.Configuration.GetSection("Auth").Exists())
     builder.Services.AddAuthAdapter();
 }
 
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddSingleton<IndexWorker>();
+builder.Services.AddHostedService<IndexWorker>(sp => sp.GetRequiredService<IndexWorker>());
 
 builder.Services.AddControllers();
 
