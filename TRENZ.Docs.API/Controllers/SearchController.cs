@@ -34,18 +34,20 @@ public class SearchController : ControllerBase
     }
 
     [HttpGet]
-    public async Task Reindex([FromQuery] string? key, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Reindex([FromQuery] string? key, CancellationToken cancellationToken = default)
     {
         if (_configuration["ReindexPassword"] != key)
-            return;
+            return Unauthorized();
 
 #if !DEBUG
-        if (DateTime.Now - _lastReindex < TimeSpan.FromMinutes(30))
-            return;
+        if (DateTime.Now - _lastReindex < TimeSpan.FromSeconds(_configuration.GetValue<int>("ReindexThrottling")))
+            return new StatusCodeResult(429);
 
         _lastReindex = DateTime.Now;
 #endif
 
         await _indexWorker.DoReindex(cancellationToken);
+
+        return Ok();
     }
 }
